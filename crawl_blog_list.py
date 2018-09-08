@@ -24,7 +24,10 @@ while i < len(table_data):
     d['name'] = table_data[i].text
     d['link'] = table_data[i+1].find('a').get('href')
     d['desc'] = table_data[i+2].text
-    d['social'] = table_data[i+1].find('a').get('href')
+    # TODO social only get one link.
+    d['social'] = None
+    if not table_data[i+3].find('a') == None:
+        d['social'] = table_data[i+3].find('a').get('href')
     blog_list.append(d)
     i += 4
 

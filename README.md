@@ -11,3 +11,6 @@
 *Beautiful soup, Selenium 공부자료.*
 
 <https://beomi.github.io/gb-crawling/posts/2017-01-20-HowToMakeWebCrawler.html>
+
+한글화 된 문서
+<http://creativeworks.tistory.com/entry/Web-Crawler-001-Creating-a-New-Project?category=638090>

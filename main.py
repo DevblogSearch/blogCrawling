@@ -4,8 +4,8 @@ from spider import Spider
 from domain import *
 from general import *
 
-PROJECT_NAME = 'blog'
-HOMEPAGE = 'https://github.com/sarojaba/awesome-devblog'
+PROJECT_NAME = 'minieetea'
+HOMEPAGE = 'http://minieetea.com'
 DOMAIN_NAME = get_domain_name(HOMEPAGE)
 QUEUE_FILE = PROJECT_NAME + '/queue.txt'
 CRAWLED_FILE = PROJECT_NAME + '/crawled.txt'

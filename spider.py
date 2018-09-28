@@ -1,4 +1,4 @@
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from link_finder import LinkFinder
 from domain import *
 from general import *
@@ -47,7 +47,8 @@ class Spider:
     def gather_links(page_url):
         html_string = ''
         try:
-            response = urlopen(page_url)
+            req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
+            response = urlopen(req)
             if 'text/html' in response.getheader('Content-Type'):
                 html_bytes = response.read()
                 html_string = html_bytes.decode("utf-8")

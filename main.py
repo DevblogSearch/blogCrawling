@@ -4,14 +4,8 @@ from queue import Queue
 from spider import Spider
 from domain import *
 from general import *
-'''
-PROJECT_NAME = ''
-HOMEPAGE = 'http://minieetea.com'
-DOMAIN_NAME = get_domain_name(HOMEPAGE)
-QUEUE_FILE = PROJECT_NAME + '/queue.txt'
-CRAWLED_FILE = PROJECT_NAME + '/crawled.txt'
-queue = Queue()
-'''
+
+
 stream = open('db.yml', 'r', encoding="UTF8")
 data = yaml.load(stream)
 NUMBER_OF_PROCESSORS = 8

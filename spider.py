@@ -2,6 +2,7 @@ from urllib.request import Request, urlopen
 from link_finder import LinkFinder
 from domain import *
 from general import *
+import blog_parse
 
 
 class Spider:
@@ -54,6 +55,7 @@ class Spider:
                 html_string = html_bytes.decode("utf-8")
             finder = LinkFinder(Spider.base_url, page_url)
             finder.feed(html_string)
+            blog_parse.parse_content(Spider.base_url, page_url, html_string)
         except Exception as e:
             print(str(e))
             return set()

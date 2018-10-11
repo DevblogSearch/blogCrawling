@@ -88,7 +88,7 @@ class Spider:
         for url in links:
             if (url in Spider.queue) or (url in Spider.crawled):
                 continue
-            for i in range(len(Spider.base_url)):
+            for i in range(len(Spider.base_url)-1):
                 if Spider.domain_name[i] != get_domain_name(url)[i]:
                     is_same_domain = False
                     break

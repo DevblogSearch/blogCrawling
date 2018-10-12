@@ -15,3 +15,22 @@
 *한글화 된 문서*
 
 <http://creativeworks.tistory.com/entry/Web-Crawler-001-Creating-a-New-Project?category=638090>
+
+# Overview
+한국 개발자 블로그 웹사이트의 크롤러 부분입니다.
+블로그는 https://github.com/sarojaba/awesome-devblog 의 db.yml 파일에서 데이터를 얻어오고 있습니다.
+
+# 소스 파일 설명
+
+*spider.py
+크롤러의 실제적인 부분입니다. 블로그 url을 얻어 txt파일로 저장합니다.
+*domain.py
+url의 도메인 부분(netloc)만 얻을 때 이용합니다.
+*general.py
+얻어온 url을 저장할 디렉토리와 txt파일을 만들 때 이용합니다.
+*blog_parse.py
+txt파일로 저장된 url을 열어 페이지의 내용을 얻어올 때 이용합니다.
+
+# 이용 방법
+main.py에서 db.yml파일에 있는 블로그들의 url을 넘겨줍니다.
+다른 url에서 이용하기 위해서는 db.yml에 있는 형식으로 url과 name을 추가하면 가능합니다.

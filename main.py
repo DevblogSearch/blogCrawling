@@ -1,18 +1,16 @@
 import threading
+import yaml
 from queue import Queue
 from spider import Spider
 from domain import *
 from general import *
 
-PROJECT_NAME = 'minieetea'
-HOMEPAGE = 'http://minieetea.com'
-DOMAIN_NAME = get_domain_name(HOMEPAGE)
-QUEUE_FILE = PROJECT_NAME + '/queue.txt'
-CRAWLED_FILE = PROJECT_NAME + '/crawled.txt'
+stream = open('db.yml', 'r', encoding = "UTF8")
+data = yaml.load(stream)
 NUMBER_OF_THREADS = 8
-queue = Queue()
-Spider(PROJECT_NAME, HOMEPAGE, DOMAIN_NAME)
 
+# get num of bloggers in db.yml by using tag 'name'
+NUMBER_OF_BLOGGERS = 2 # for test (original value : 1053)
 
 # Create worker threads (will die when main exits)
 def create_workers():
@@ -46,5 +44,19 @@ def crawl():
         create_jobs()
 
 
-create_workers()
-crawl()
+for person in range(NUMBER_OF_BLOGGERS):
+
+    try:
+        PROJECT_NAME = data[person]['name']
+        HOMEPAGE = data[person]['blog']
+        DOMAIN_NAME = get_domain_name(HOMEPAGE)
+        Spider(PROJECT_NAME, HOMEPAGE, DOMAIN_NAME)
+
+        QUEUE_FILE = PROJECT_NAME + '/queue.txt'
+        CRAWLED_FILE = PROJECT_NAME + '/crawled.txt'
+        queue = Queue()
+
+        create_workers()
+        crawl()
+
+    except: pass

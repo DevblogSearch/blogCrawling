@@ -8,7 +8,7 @@ blog_data = []
 blog_content = []
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BUFFER_SIZE = 10
-DOC_UPDATE_URL = "http://127.0.0.1:3000/document"
+DOC_UPDATE_URL = "http://127.0.0.1:80/document"
 
 def parse_content(base_url, page_url, html):
     soup = BeautifulSoup(html, 'html.parser')

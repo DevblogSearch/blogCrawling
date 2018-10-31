@@ -1,14 +1,13 @@
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
-from html.parser import HTMLParser
 from urllib import parse
 from domain import *
 from general import *
-import itertools
 import requests
+import itertools
+
 
 class Spider:
-
     project_name = ''
     base_url = ''
     domain_name = ''
@@ -44,32 +43,40 @@ class Spider:
     # Updates user display, fills queue and updates files
     @staticmethod
     def crawl_page(thread_name, page_url):
-
-        
         if page_url not in Spider.crawled:
 
+            Pdomain_name = get_sub_domain_name(page_url).split('.')            
             # blog.naver.com // brunch.co.kr 전용 크롤링
-            Spider.user_id = Spider.get_blogger_ID(Spider.base_url)
-            Spider.find_links_in_linear(page_url, Spider.user_id, 0)
+
+            if (Pdomain_name[-3] == "brunch"
+                or Pdomain_name[-2] == "naver"):
+
+                Spider.queue.remove(page_url)
+                Spider.update_files()
+                Spider.user_id = Spider.get_blogger_ID(Spider.base_url)
+                Spider.find_links_in_linear(page_url, Spider.user_id, 1)
+
+            if get_sub_domain_name(base_url)[-3] == "medium":
+                return
 
             # 그 외 블로그 크롤링 시 사용하는 코드
-            print(thread_name + ' now crawling ' + page_url)
-            print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
-            Spider.add_links_to_queue(Spider.gather_links(Spider.base_url, page_url))
-            Spider.queue.remove(page_url)
-            Spider.crawled.add(page_url)
-            Spider.update_files()
-            
-
+            else:
+                #print(thread_name + ' now crawling ' + page_url)
+                #print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
+                Spider.add_links_to_queue(Spider.gather_links(Spider.base_url, page_url))
+                Spider.queue.remove(page_url)
+                Spider.crawled.add(page_url)
+                Spider.update_files()
+        
     # Converts raw response data into readable information and checks for proper html formatting
     @staticmethod
     def gather_links(base_url, page_url):
 
         page_links = set()
         try:
-            req = Request(page_url, headers={'User-Agent' : 'Mozilla/5.0'})
+            req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
             soup = BeautifulSoup(urlopen(req), 'html.parser')
-            res = soup.find_all('a', href = True)
+            res = soup.find_all('a', href=True)
 
             for link in res:
                 url = parse.urljoin(base_url, link.get('href'))
@@ -80,53 +87,99 @@ class Spider:
             return set()
 
         return page_links
+
     # Saves queue data to project files
     @staticmethod
     def add_links_to_queue(links):
 
-        is_same_domain = True    
+        is_same_domain = True
         for url in links:
             if (url in Spider.queue) or (url in Spider.crawled):
                 continue
-            for i in range(len(Spider.base_url)-1):
+            for i in range(len(Spider.base_url) - 1):
                 if Spider.domain_name[i] != get_domain_name(url)[i]:
                     is_same_domain = False
                     break
 
-            if(is_same_domain):
+            if (is_same_domain):
                 Spider.queue.add(url)
-            else: is_same_domain = True
+            else:
+                is_same_domain = True
 
     @staticmethod
     def find_links_in_linear(base_url, userid, num):
-        URL_FORMAT = [
-            "http://blog.naver.com/PostList.nhn?blogId={blog_id}&currentPage={page}"
-            , "http://brunch.co.kr/{blog_Id}/{page}" ]
 
+        URL_FORMAT = ["http://blog.naver.com/PostList.nhn?blogId={blog_id}&currentPage={page}"
+                      , "http://brunch.co.kr/{blog_id}/{page}"]
         Blog_platform = URL_FORMAT[num]
         size_of_block = 0
-        # itertools 이용, page의 값을 1부터 준다.
-        for page in itertools.count(start=1):
-            url = Blog_platform.format(blog_id = userid, page = page)
 
-            # 요청을 보낸 뒤, 페이지가 없을 경우 iteration을 종료한다.
+        # 브런치 블로그 크롤링
+        # 요청을 보낸 뒤, 페이지가 없을 경우 iteration을 종료한다.
+        for page in itertools.count(start=1):
+            url = Blog_platform.format(blog_id=userid, page= page)
+
             try:
                 r = requests.get(url)
                 r.raise_for_status()
-                print("Now Crawling : " + url)
             except requests.HTTPError as e:
                 print(e)
                 break
-
-            # URL만 얻어온 후, crawled 된 페이지 + 1
+            print("Now Crawling : " + url)
             Spider.crawled.add(url)
-            size_of_block += 1
-            
-            # if crawler gathers 50 links in the queue, update crawled.txt file.
-            if (size_of_block == 50):
+            size_of_block +=1
+            if (size_of_block >= 10):
                 Spider.update_files()
                 size_of_block = 0
 
+        # 추가되지않고 남아있는 url을 모두 update해준다.
+        Spider.update_files()
+
+        '''
+        # 네이버 블로그 리디렉션
+        page = 1
+
+        # page를 1부터 증가시켜 100개의 page만 확인한다.
+        while (page < 101):
+            url = Blog_platform.format(blog_id=userid, page= page)
+
+            r = requests.get(url)
+            soup = BeautifulSoup(r.text, 'html.parser')
+
+            redirected_url = soup.find_all('a', {'class': 'fil5 pcol2'})
+            redirected_url += soup.find_all('a', {'class':"url pcol2 _setClipboard _returnFalse _se3copybtn _transPosition"})
+
+            redirection_url_format = "https://blog.naver.com/PostView.nhn?blogId={blogid}&logNo={log_No}&categoryNo=0&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=menu"
+
+            try:
+                print("Now Crawling : " + url)
+                for i in range(0, len(redirected_url)):
+                    if (redirected_url[i].get('class') == 'fil5 pcol2'
+                        or redirected_url[i].get('class')[0] == 'fil5'):
+                        
+                        real_url = redirected_url[i].get('href')
+                        logNo = urlparse(real_url).path.replace("/", "")[len(userid):]
+                        Spider.crawled.add(redirection_url_format.format(blogid=userid, log_No=logNo))
+                    else:
+                        real_url = redirected_url[i].get('title')
+                        logNo = urlparse(real_url).path.replace("/", "")[len(userid):]
+                        Spider.crawled.add(redirection_url_format.format(blogid=userid, log_No=logNo))
+                    # crawled.txt에 url 추가 후 size_of_block +1
+                    size_of_block += 1
+
+                # if crawler gathers 50 links in the queue, update crawled.txt file.
+                if (size_of_block >= 10):
+                    Spider.update_files()
+                    size_of_block = 0
+
+                page +=1
+            except Exception as e:
+                print("error발생 : " + e)
+                break
+                
+        # 추가되지않고 남아있는 url을 모두 update해준다.
+        Spider.update_files()
+        '''
     @staticmethod
     def update_files():
         set_to_file(Spider.queue, Spider.queue_file)

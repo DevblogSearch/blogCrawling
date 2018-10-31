@@ -170,10 +170,6 @@
   rss: http://kyejusung.com/feed/
   description: ''
   twitter: https://twitter.com/kyejusung
-- name: 고득녕
-  blog: http://blog.naver.com/nackji80/
-  rss:  http://blog.rss.naver.com/nackji80.xml
-  description: 네트워크
 - name: 고명석
   blog: http://blog.myeongsku.com/
   rss: http://blog.myeongsku.com/rss
@@ -315,10 +311,6 @@
   github: https://github.com/gwonsungjun
   facebook: https://www.facebook.com/sungjun.gwon
   twitter: https://twitter.com/kwen5600
-- name: 권수호
-  blog: http://blog.naver.com/knix008
-  rss: http://blog.rss.naver.com/knix008.xml
-  description: C
 - name: 권영재
   blog: http://nesoy.github.io/
   rss: https://nesoy.github.io/atom.xml
@@ -609,12 +601,6 @@
   description: Microsoft
   facebook: https://www.facebook.com/himskim
   twitter: https://twitter.com/himskim
-- name: 김명주
-  blog: http://blog.naver.com/bansuk78
-  rss: http://blog.rss.naver.com/bansuk78.xml
-  description: Lagom
-  facebook: https://www.facebook.com/profile.php?id=100003114345953
-  slideshare: https://www.slideshare.net/ssuser45ecc2
 - name: 김명준
   blog: http://html5lab.kr/
   description: 프론트엔드
@@ -629,11 +615,6 @@
   description: Laravel
   github: https://github.com/getsolaris
   facebook: https://www.facebook.com/mingeun.kr
-- name: 김민서
-  blog: http://blog.naver.com/mseokim011117
-  rss: http://blog.rss.naver.com/mseokim011117.xml
-  description: Swift
-  github: github.com/mseokim
 - name: 김민석
   blog: http://brunch.co.kr/@brunchqvxt
   rss: https://brunch.co.kr/atom/@@O1Z
@@ -747,10 +728,6 @@
   blog: http://sunyzero.tistory.com/
   rss: http://sunyzero.tistory.com/rss
   description: Linux
-- name: 김선철
-  blog: http://blog.naver.com/sckim007
-  rss: http://blog.rss.naver.com/sckim007.xml
-  description: ''
 - name: 김선태
   facebook: https://www.facebook.com/oasisgarden
   linkedin: https://www.linkedin.com/in/suntae/
@@ -943,10 +920,6 @@
   twitter: https://twitter.com/ysoya
   slideshare: https://www.slideshare.net/yonghakim900
   googleplus: https://plus.google.com/105361501922186808818
-- name: 김용현
-  blog: http://blog.naver.com/drvoss
-  rss: http://blog.rss.naver.com/drvoss.xml
-  description: C++
 - name: 김용호
   blog: http://medium.com/@kimyh1981
   rss: https://medium.com/feed/@kimyh1981
@@ -986,12 +959,6 @@
   blog: http://www.ikwisdom.com/
   rss: http://www.ikwisdom.com/feeds/posts/default
   description: 소프트웨어 컨설팅
-- name: 김인권
-  blog: http://blog.naver.com/gi_balja
-  rss: https://rss.blog.naver.com/gi_balja.xml
-  facebook: https://www.facebook.com/inkweon7269
-  youtube: https://www.youtube.com/user/INKWEON7269
-  brunch: https://brunch.co.kr/@brunch92ny
 - name: 김인기
   blog: http://ingeec.tistory.com/
   rss: http://ingeec.tistory.com/rss
@@ -1053,12 +1020,6 @@
   rss: http://blog.jeonghwan.net/feed.xml
   description: Javascript, Node
   github: https://github.com/jeonghwan-kim
-- name: 김정환
-  blog: http://blog.naver.com/writer0713/
-  rss: https://rss.blog.naver.com/writer0713.xml
-  description: Javascript, Java, Web
-  github: https://github.com/writer0713
-  linkedin: https://www.linkedin.com/in/junghwan-kim-799425b6/
 - name: 김정훈
   blog: http://wonderer80.github.io/
   rss: http://wonderer80.github.io/feed.xml
@@ -1492,11 +1453,6 @@
   rss: https://heejune.me/feed/
   description: ''
   linkedin: https://www.linkedin.com/in/heejune/
-- name: 나동빈
-  blog: http://blog.naver.com/ndb796
-  rss: https://rss.blog.naver.com/ndb796.xml
-  description: 알고리즘
-  youtube: https://www.youtube.com/channel/UChflhu32f5EUHlY7_SetNWw
 - name: 나세화
   blog: http://medium.com/@nsh235482
   rss: https://medium.com/feed/@nsh235482
@@ -1737,10 +1693,6 @@
   description: Front-end
   facebook: https://www.facebook.com/zooqzqz
   github: https://github.com/isme2n
-- name: 박민근(알콜코더)
-  blog: http://blog.naver.com/agebreak
-  rss: http://agebreak.blog.me/rss
-  description: 게임 개발
 - name: 박민서
   blog: http://medium.com/@minseopark
   rss: https://medium.com/feed/@minseopark
@@ -2087,12 +2039,6 @@
   rss: https://medium.com/feed/@parkchansung
   description: TensorFlow
   facebook: https://www.facebook.com/Thomas.CS.Park
-- name: 박찬준
-  blog: http://blog.naver.com/bcj1210
-  rss: https://rss.blog.naver.com/bcj1210.xml
-  description: NLP
-  facebook: https://www.facebook.com/chanjune.park
-  baekjoon: https://www.acmicpc.net/user/bcj1210
 - name: 박찬엽
   blog: http://mrchypark.github.io/
   rss: https://mrchypark.github.io/index.xml
@@ -2190,11 +2136,6 @@
   facebook: https://www.facebook.com/doosik.bae
   github: https://github.com/baidoosik
   home: https://www.doosikbae.com/
-- name: 배수한
-  blog: http://blog.naver.com/soohan530/
-  rss: https://rss.blog.naver.com/soohan530.xml
-  description: 고등학생 개발
-  github: https://github.com/SoohanBae
 - name: 배성혁
   blog: http://debop.tumblr.com/
   rss: http://debop.tumblr.com/rss
@@ -2221,13 +2162,6 @@
   rss: https://medium.com/feed/@baejinho
   description: 스타트업, 치킨모임
   facebook: https://www.facebook.com/bae.jinho.3
-- name: 백승엽
-  blog: http://blog.naver.com/backsajang420
-  rss: https://rss.blog.naver.com/backsajang420.xml
-  description: Web, Front-end, Back-end
-  github: https://github.com/Dev-JeromeBaek
-  pinterest: https://www.pinterest.co.kr/jeromebaek/
-  portfolio: https://jeromeBaek-portfolio.ml
 - name: 백재연
   blog: http://jybaek.tistory.com/
   rss: http://jybaek.tistory.com/rss
@@ -2332,10 +2266,6 @@
   home: http://mkseo.pe.kr/
   blog2: http://mkseo.pe.kr/stats/
   rss2: http://mkseo.pe.kr/stats/?feed=rss2
-- name: 서민상
-  blog: http://blog.naver.com/seo0511
-  rss: https://rss.blog.naver.com/seo0511.xml
-  description: Arduino
 - name: 서보룡
   blog: http://inter6.tistory.com/
   rss: http://inter6.tistory.com/rss
@@ -2464,10 +2394,6 @@
   github: https://github.com/sculove
   facebook: https://www.facebook.com/chanuk.son
   youtube: https://www.youtube.com/user/sculoveKor
-- name: 송기원
-  blog: http://blog.naver.com/agilesoft
-  rss: https://rss.blog.naver.com/agilesoft.xml
-  description: Front-end
 - name: 송다운
   blog: http://medium.com/@downy
   rss: https://medium.com/feed/@downy
@@ -2888,10 +2814,6 @@
   facebook: https://www.facebook.com/profile.php?id=100004971253829
   github: https://github.com/AlpoxDev/
   home: http://alpox.kr/
-- name: 양병규
-  blog: http://blog.naver.com/delmadang
-  rss: https://rss.blog.naver.com/delmadang.xml
-  description: 칼럼
 - name: 양병석
   blog: http://fstory97.blog.me/
   rss: http://fstory97.blog.me/rss
@@ -2942,12 +2864,6 @@
   description: Docker
   github: https://github.com/yangroro
   facebook: https://www.facebook.com/heechanyan
-- name: 엄민석
-  blog: http://blog.naver.com/eominsuk55
-  rss: https://rss.blog.naver.com/eominsuk55.xml
-  description: Android
-  facebook: https://www.facebook.com/profile.php?id=100003794115240
-  github: https://github.com/BoxResin
 - name: 엄승현
   blog: http://blog.eomdev.com
   rss: http://blog.eomdev.com/feed
@@ -3055,13 +2971,6 @@
   blog: http://brunch.co.kr/@hopeless
   rss: https://brunch.co.kr/rss/@@2iiS
   description: Android
-- name: 오준영
-  blog: http://blog.naver.com/lestat85
-  rss: https://rss.blog.naver.com/lestat85.xml
-  description: Java
-  facebook: https://www.facebook.com/juneyoung.oh.7
-  linkedin: https://www.linkedin.com/in/juneyoung
-  slideshare: https://www.slideshare.net/juneyoungoh7
 - name: 오지선
   blog: http://12bme.tistory.com/
   rss: http://12bme.tistory.com/rss
@@ -3091,10 +3000,6 @@
   facebook: https://www.facebook.com/xenonix
   instagram: https://www.instagram.com/xenonix/
   slideshare: https://www.slideshare.net/xenonix
-- name: 용찬호
-  blog: http://blog.naver.com/alice_k106
-  rss: https://rss.blog.naver.com/alice_k106.xml
-  description: Docker, RTOS
 - name: 우웅몬
   blog: http://brunch.co.kr/@wej6688
   rss: https://brunch.co.kr/rss/@@zKy
@@ -3127,10 +3032,6 @@
   blog: http://www.simpleisbest.net/
   rss: http://www.simpleisbest.net/syndication.axd
   description: ".NET"
-- name: 유동곤
-  blog: http://blog.naver.com/ehdrhs1004
-  rss: https://rss.blog.naver.com/ehdrhs1004.xml
-  description: C++
 - name: 유동환
   blog: http://brunch.co.kr/@yudong
   rss: https://brunch.co.kr/rss/@@6dD
@@ -3402,10 +3303,6 @@
   linkedin: https://www.linkedin.com/in/dongminlee/
   slideshare: https://www.slideshare.net/DongMinLee32
 - name: 이동욱
-  blog: http://blog.naver.com/edy5016
-  rss: https://rss.blog.naver.com/edy5016.xml
-  description: Spring Boot
-- name: 이동욱
   blog: http://jojoldu.tistory.com/
   rss: https://jojoldu.tistory.com/rss
   description: Java, Spring, IntelliJ, Backend
@@ -3501,14 +3398,6 @@
   facebook: https://www.facebook.com/bonggyun.lee.7
   linkedin: https://www.linkedin.com/in/bonggyun-lee-b55359b3/
   home: https://bglee.me/
-- name: 이상균
-  blog: http://blog.naver.com/iyooha
-  rss: https://rss.blog.naver.com/iyooha.xml
-  description: Game
-  twitter: https://twitter.com/iyooha
-  linkedin: https://www.linkedin.com/in/iyooha/
-  slideshare: https://www.slideshare.net/iyooha
-  home: http://iyooha.com/
 - name: 이상문
   blog: http://medium.com/@moony211
   rss: https://medium.com/feed/@moony211
@@ -3600,19 +3489,10 @@
   blog: http://crazrain.tistory.com/
   rss: http://crazrain.tistory.com/rss
   description: Spring Boot
-- name: 이성몽
-  blog: http://blog.naver.com/santalsm
-  rss: https://rss.blog.naver.com/santalsm.xml
-  description: 기술사
 - name: 이성원
   blog: http://blog.sungwonandseohyun.us/
   rss: http://blog.sungwonandseohyun.us/rss/
   description: ''
-- name: 이성준
-  blog: http://blog.naver.com/occidere
-  rss: https://rss.blog.naver.com/occidere.xml
-  github: https://github.com/occidere
-  discription: Algorithms, Java, Linux, OpenSources
 - name: 이성호
   blog: http://blog.scaloid.org/
   rss: http://blog.scaloid.org/feeds/posts/default
@@ -3772,12 +3652,6 @@
   rss: http://name267.tistory.com/rss
   description: C#
   facebook: https://www.facebook.com/wookjin.lee.50
-- name: 이웅원
-  blog: http://blog.naver.com/dnddnjs11
-  rss: https://rss.blog.naver.com/dnddnjs11.xml
-  description: 강화학습
-  linkedin: https://www.linkedin.com/in/woong-won-lee-247597111
-  slideshare: https://www.slideshare.net/WoongwonLee
 - name: 이웅희
   blog: http://woongheelee.com/
   rss: http://woongheelee.com/rss
@@ -3904,11 +3778,6 @@
   facebook: https://www.facebook.com/vonzone
   twitter: https://twitter.com/vonzone
   linkedin: https://www.linkedin.com/in/vonzone/
-- name: 이준희
-  blog: http://blog.naver.com/robo813
-  rss: https://rss.blog.naver.com/robo813.xml
-  description: 한글시계
-  facebook: https://www.facebook.com/neo81389
 - name: 이지영
   blog: http://www.bloter.net/archives/author/izziene
   description: 통신, 금융
@@ -4001,10 +3870,6 @@
   facebook: https://www.facebook.com/hyunseob.lee.7
   linkedin: https://www.linkedin.com/in/hyunseoblee/
   github: https://github.com/hyunseob
-- name: 이현우
-  blog: http://blog.naver.com/hidejj79
-  rss: https://rss.blog.naver.com/hidejj79.xml
-  description: ''
 - name: 이현주
   blog: http://wayhome25.github.io/
   rss: https://wayhome25.github.io/atom.xml
@@ -4333,11 +4198,6 @@
   linkedin: https://www.linkedin.com/in/fuzer/
   github: https://github.com/FuZer
   facebook: https://www.facebook.com/shtowever
-- name: 전재훈
-  blog: http://blog.naver.com/hupers
-  rss: https://rss.blog.naver.com/hupers.xml
-  description: MES
-  facebook: https://www.facebook.com/hupers
 - name: 전종홍
   blog: http://mobile2.tistory.com/
   rss: http://mobile2.tistory.com/rss
@@ -4402,12 +4262,6 @@
   facebook: https://www.facebook.com/lesstif
   github: https://github.com/lesstif
   slideshare: https://www.slideshare.net/ssuser800974
-- name: 정기완
-  blog: http://blog.naver.com/drifterz303
-  rss: https://rss.blog.naver.com/drifterz303.xml
-  description: Front-end, Back-end
-  github: https://github.com/makkaba
-  medium: https://medium.com/@drifterz303
 - name: 정기욱
   blog: http://jusths.tistory.com/
   rss: http://jusths.tistory.com/rss
@@ -4797,11 +4651,6 @@
   facebook: https://www.facebook.com/junho
   github: https://github.com/junhocho
   home: http://tmmse.xyz/junhocho/
-- name: 조중현
-  blog: http://blog.naver.com/chowin21
-  rss: https://rss.blog.naver.com/chowin21.xml
-  description: 마케팅
-  facebook: https://www.facebook.com/chowin21
 - name: 조창민
   blog: http://incredible.ai/
   rss: http://incredible.ai/feed.xml
@@ -4897,10 +4746,6 @@
   blog: http://softwaregeeks.org/
   rss: http://softwaregeeks.org/feed/
   description: 오픈소스
-- name: 진수민
-  blog: http://blog.naver.com/pistolcaffe
-  rss: https://rss.blog.naver.com/pistolcaffe.xml
-  description: Android
 - name: 진영화
   blog: http://medium.com/@timotolkie
   rss: https://medium.com/feed/@timotolkie
@@ -5091,10 +4936,6 @@
   blog: http://brunch.co.kr/@pilsogood
   rss: https://brunch.co.kr/rss/@@1iQC
   description: 트립그리다
-- name: 최용석
-  blog: http://blog.naver.com/cys_star
-  rss: https://rss.blog.naver.com/cys_star.xml
-  description: ''
 - name: 최용호
   blog: http://yongho1037.tistory.com/
   rss: http://yongho1037.tistory.com/rss
@@ -5137,11 +4978,6 @@
   blog: http://bestalign.github.io/
   rss: http://bestalign.github.io/atom.xml
   description: Javascript
-- name: 최정연
-  blog: http://blog.naver.com/cenodim
-  rss: https://rss.blog.naver.com/cenodim.xml
-  description: Kotlin
-  facebook: https://www.facebook.com/Mynoti
 - name: 최종욱
   blog: http://wook.kr/
   description: ''
@@ -5492,10 +5328,6 @@
   blog: http://jhyun.wordpress.com/
   rss: https://jhyun.wordpress.com/feed/
   description: 웹접근성
-- name: 홍길한
-  blog: http://blog.naver.com/hgh73
-  rss: https://rss.blog.naver.com/hgh73.xml
-  description: 워드프레스
 - name: 홍민희(dahlia)
   blog: http://blog.hongminhee.org/
   rss: https://blog.hongminhee.org/feed.xml
@@ -5529,10 +5361,6 @@
   blog: http://brunch.co.kr/@doberman
   rss: https://brunch.co.kr/rss/@@QPF
   description: 스타트업
-- name: 홍정모
-  blog: http://blog.naver.com/atelierjpro
-  rss: https://rss.blog.naver.com/atelierjpro.xml
-  description: AI
 - name: 홍철주
   blog: http://medium.com/@angdev
   rss: https://medium.com/feed/@angdev

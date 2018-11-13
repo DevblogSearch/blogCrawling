@@ -44,6 +44,8 @@ txt파일로 저장된 url을 열어 페이지의 내용을 얻어올 때 이용
 
 main.py에서 원하는 블로그 플랫폼이 저장된 yml 파일을 입력 값으로 넣어줍니다.
 
+사용한 yml 파일에 따라 main.py에 있는 NUM_OF_BLOGGERS 값을 변경해줍니다.
+
 다른 url에서 이용하기 위해서는 yml 파일에 있는 형식으로 url과 name을 추가하면 가능합니다.
 
 chrome webdriver 설치 후, spider.py의

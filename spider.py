@@ -43,51 +43,52 @@ class Spider:
     # Updates user display, fills queue and updates files
     @staticmethod
     def crawl_page(thread_name, page_url):
-        Pdomain_name = get_sub_domain_name(page_url).split('.')
+        if page_url not in Spider.crawled:
+            Pdomain_name = get_sub_domain_name(page_url).split('.')
 
-        # medium 블로그 크롤링 시 이용
-        if Pdomain_name[-2] == "medium":
-            Spider.add_links_to_queue(Spider.gather_links_in_medium(Spider.base_url, page_url))
-            Spider.queue.remove(page_url)
-            Spider.crawled.add(page_url)
-            Spider.update_files()
+            # medium 블로그 크롤링 시 이용
+            if Pdomain_name[-2] == "medium":
+                Spider.add_links_to_queue(Spider.gather_links_in_medium(Spider.base_url, page_url))
+                Spider.queue.remove(page_url)
+                Spider.crawled.add(page_url)
+                Spider.update_files()
 
-        # db.yml 파일 사용 시 주석처리 해줘야 함.
-        elif Pdomain_name[-2] == "blogspot":
-            path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
+            # db.yml 파일 사용 시 주석처리 해줘야 함.
+            elif Pdomain_name[-2] == "blogspot":
+                path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
 
-            options = webdriver.ChromeOptions()
-            options.add_argument("--headless")
+                options = webdriver.ChromeOptions()
+                options.add_argument("--headless")
 
-            driver = webdriver.Chrome(executable_path = path, chrome_options = options)
-            Spider.add_links_in_sync_web(Spider.gather_links_in_sync_web(page_url, driver))
+                driver = webdriver.Chrome(executable_path = path, chrome_options = options)
+                Spider.add_links_in_sync_web(Spider.gather_links_in_sync_web(page_url, driver))
 
-            driver.close()
-            Spider.queue.remove(page_url)
-            Spider.crawled.add(page_url)
-            Spider.update_files()
+                driver.close()
+                Spider.queue.remove(page_url)
+                Spider.crawled.add(page_url)
+                Spider.update_files()
 
-        # blog.naver.com // brunch.co.kr 전용 크롤링
-        # naver 일 때, linear함수의 int 인자값으로 0, brunch 일 때, 인자값으로 1 입력
-        elif (len(Pdomain_name) > 2 and
-              (Pdomain_name[-3] == "brunch" or Pdomain_name[-2] == "naver")):
+            # blog.naver.com // brunch.co.kr 전용 크롤링
+            # naver 일 때, linear함수의 int 인자값으로 0, brunch 일 때, 인자값으로 1 입력
+            elif (len(Pdomain_name) > 2 and
+                  (Pdomain_name[-3] == "brunch" or Pdomain_name[-2] == "naver")):
 
-            idx = 0
-            if (Pdomain_name[-3] == "brunch"): idx = 1
+                idx = 0
+                if (Pdomain_name[-3] == "brunch"): idx = 1
 
-            Spider.user_id = Spider.get_blogger_ID(Spider.base_url)
-            Spider.find_links_in_linear(page_url, Spider.user_id, idx)
-            Spider.queue.remove(page_url)
-            Spider.update_files()
+                Spider.user_id = Spider.get_blogger_ID(Spider.base_url)
+                Spider.find_links_in_linear(page_url, Spider.user_id, idx)
+                Spider.queue.remove(page_url)
+                Spider.update_files()
             
-        # 그 외 블로그 크롤링 시 사용하는 코드
-        else:
-            #print(thread_name + ' now crawling ' + page_url)
-            #print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
-            Spider.add_links_to_queue(Spider.gather_links(Spider.base_url, page_url))
-            Spider.queue.remove(page_url)
-            Spider.crawled.add(page_url)
-            Spider.update_files()
+            # 그 외 블로그 크롤링 시 사용하는 코드
+            else:
+                #print(thread_name + ' now crawling ' + page_url)
+                #print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
+                Spider.add_links_to_queue(Spider.gather_links(Spider.base_url, page_url))
+                Spider.queue.remove(page_url)
+                Spider.crawled.add(page_url)
+                Spider.update_files()
 
     # Converts raw response data into readable information and checks for proper html formatting
     @staticmethod

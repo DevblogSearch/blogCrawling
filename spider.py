@@ -141,72 +141,70 @@ class Spider:
         Blog_platform = URL_FORMAT[num]
         size_of_block = 0
 
-        # 브런치 블로그 크롤링
+        # 브런치 블로그 크롤링 , num = 1
         # 요청을 보낸 뒤, 페이지가 없을 경우 iteration을 종료한다.
-        for page in itertools.count(start=1):
-            url = Blog_platform.format(blog_id=userid, page= page)
+        if num == 1:
+            for page in itertools.count(start=1):
+                url = Blog_platform.format(blog_id=userid, page= page)
 
-            try:
-                r = requests.get(url)
-                r.raise_for_status()
-            except requests.HTTPError as e:
-                print(e)
-                break
-            print("Now Crawling : " + url)
-            Spider.crawled.add(url)
-            size_of_block +=1
-            if (size_of_block >= 10):
-                Spider.update_files()
-                size_of_block = 0
-
-        # 추가되지않고 남아있는 url을 모두 update해준다.
-        Spider.update_files()
-
-        '''
-        # 네이버 블로그 리디렉션
-        page = 1
-
-        # page를 1부터 증가시켜 100개의 page만 확인한다.
-        while (page < 101):
-            url = Blog_platform.format(blog_id=userid, page= page)
-
-            r = requests.get(url)
-            soup = BeautifulSoup(r.text, 'html.parser')
-
-            redirected_url = soup.find_all('a', {'class': 'fil5 pcol2'})
-            redirected_url += soup.find_all('a', {'class':"url pcol2 _setClipboard _returnFalse _se3copybtn _transPosition"})
-
-            redirection_url_format = "https://blog.naver.com/PostView.nhn?blogId={blogid}&logNo={log_No}&categoryNo=0&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=menu"
-
-            try:
+                try:
+                    r = requests.get(url)
+                    r.raise_for_status()
+                except requests.HTTPError as e:
+                    print(e)
+                    break
                 print("Now Crawling : " + url)
-                for i in range(0, len(redirected_url)):
-                    if (redirected_url[i].get('class') == 'fil5 pcol2'
-                        or redirected_url[i].get('class')[0] == 'fil5'):
-                        
-                        real_url = redirected_url[i].get('href')
-                        logNo = urlparse(real_url).path.replace("/", "")[len(userid):]
-                        Spider.crawled.add(redirection_url_format.format(blogid=userid, log_No=logNo))
-                    else:
-                        real_url = redirected_url[i].get('title')
-                        logNo = urlparse(real_url).path.replace("/", "")[len(userid):]
-                        Spider.crawled.add(redirection_url_format.format(blogid=userid, log_No=logNo))
-                    # crawled.txt에 url 추가 후 size_of_block +1
-                    size_of_block += 1
-
-                # if crawler gathers 50 links in the queue, update crawled.txt file.
+                Spider.crawled.add(url)
+                size_of_block +=1
                 if (size_of_block >= 10):
                     Spider.update_files()
                     size_of_block = 0
 
-                page +=1
-            except Exception as e:
-                print("error발생 : " + e)
-                break
-                
+        else:
+            # 네이버 블로그 리디렉션
+            page = 1
+
+            # page를 1부터 증가시켜 100개의 page만 확인한다.
+            while (page < 101):
+                url = Blog_platform.format(blog_id=userid, page= page)
+
+                r = requests.get(url)
+                soup = BeautifulSoup(r.text, 'html.parser')
+
+                redirected_url = soup.find_all('a', {'class': 'fil5 pcol2'})
+                redirected_url += soup.find_all('a', {'class':"url pcol2 _setClipboard _returnFalse _se3copybtn _transPosition"})
+
+                redirection_url_format = "https://blog.naver.com/PostView.nhn?blogId={blogid}&logNo={log_No}&categoryNo=0&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=menu"
+
+                try:
+                    print("Now Crawling : " + url)
+                    for i in range(0, len(redirected_url)):
+                        if (redirected_url[i].get('class') == 'fil5 pcol2'
+                            or redirected_url[i].get('class')[0] == 'fil5'):
+                        
+                            real_url = redirected_url[i].get('href')
+                            logNo = urlparse(real_url).path.replace("/", "")[len(userid):]
+                            Spider.crawled.add(redirection_url_format.format(blogid=userid, log_No=logNo))
+                        else:
+                            real_url = redirected_url[i].get('title')
+                            logNo = urlparse(real_url).path.replace("/", "")[len(userid):]
+                            Spider.crawled.add(redirection_url_format.format(blogid=userid, log_No=logNo))
+                        # crawled.txt에 url 추가 후 size_of_block +1
+                        size_of_block += 1
+
+                    # if crawler gathers 50 links in the queue, update crawled.txt file.
+                    if (size_of_block >= 10):
+                        Spider.update_files()
+                        size_of_block = 0
+
+                    page +=1
+                except Exception as e:
+                    print("error발생 : " + e)
+                    break
+
         # 추가되지않고 남아있는 url을 모두 update해준다.
         Spider.update_files()
-        '''
+
     # blogspot 동적 페이지 용 크롤러
     @staticmethod
     def add_links_in_sync_web(links):

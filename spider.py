@@ -3,9 +3,9 @@ from bs4 import BeautifulSoup
 from urllib import parse
 from domain import *
 from general import *
+from selenium import webdriver
 import requests
 import itertools
-
 
 class Spider:
     project_name = ''
@@ -34,7 +34,7 @@ class Spider:
         Spider.queue = file_to_set(Spider.queue_file)
         Spider.crawled = file_to_set(Spider.crawled_file)
 
-    # Get Blogger's unique attribute in page url
+    # Get Blogger's unique attribute in page url (only can use on naver blog)
     @staticmethod
     def get_blogger_ID(page_url):
         id = urlparse(page_url).path.replace("/", "")
@@ -43,31 +43,52 @@ class Spider:
     # Updates user display, fills queue and updates files
     @staticmethod
     def crawl_page(thread_name, page_url):
-        if page_url not in Spider.crawled:
+        Pdomain_name = get_sub_domain_name(page_url).split('.')
 
-            Pdomain_name = get_sub_domain_name(page_url).split('.')            
-            # blog.naver.com // brunch.co.kr 전용 크롤링
+        # medium 블로그 크롤링 시 이용
+        if Pdomain_name[-2] == "medium":
+            Spider.add_links_to_queue(Spider.gather_links_in_medium(Spider.base_url, page_url))
+            Spider.queue.remove(page_url)
+            Spider.crawled.add(page_url)
+            Spider.update_files()
 
-            if (Pdomain_name[-3] == "brunch"
-                or Pdomain_name[-2] == "naver"):
+        # db.yml 파일 사용 시 주석처리 해줘야 함.
+        elif Pdomain_name[-2] == "blogspot":
+            path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
 
-                Spider.queue.remove(page_url)
-                Spider.update_files()
-                Spider.user_id = Spider.get_blogger_ID(Spider.base_url)
-                Spider.find_links_in_linear(page_url, Spider.user_id, 1)
+            options = webdriver.ChromeOptions()
+            options.add_argument("--headless")
 
-            if get_sub_domain_name(base_url)[-3] == "medium":
-                return
+            driver = webdriver.Chrome(executable_path = path, chrome_options = options)
+            Spider.add_links_in_sync_web(Spider.gather_links_in_sync_web(page_url, driver))
 
-            # 그 외 블로그 크롤링 시 사용하는 코드
-            else:
-                #print(thread_name + ' now crawling ' + page_url)
-                #print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
-                Spider.add_links_to_queue(Spider.gather_links(Spider.base_url, page_url))
-                Spider.queue.remove(page_url)
-                Spider.crawled.add(page_url)
-                Spider.update_files()
-        
+            driver.close()
+            Spider.queue.remove(page_url)
+            Spider.crawled.add(page_url)
+            Spider.update_files()
+
+        # blog.naver.com // brunch.co.kr 전용 크롤링
+        # naver 일 때, linear함수의 int 인자값으로 0, brunch 일 때, 인자값으로 1 입력
+        elif (len(Pdomain_name) > 2 and
+              (Pdomain_name[-3] == "brunch" or Pdomain_name[-2] == "naver")):
+
+            idx = 0
+            if (Pdomain_name[-3] == "brunch"): idx = 1
+
+            Spider.user_id = Spider.get_blogger_ID(Spider.base_url)
+            Spider.find_links_in_linear(page_url, Spider.user_id, idx)
+            Spider.queue.remove(page_url)
+            Spider.update_files()
+            
+        # 그 외 블로그 크롤링 시 사용하는 코드
+        else:
+            #print(thread_name + ' now crawling ' + page_url)
+            #print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
+            Spider.add_links_to_queue(Spider.gather_links(Spider.base_url, page_url))
+            Spider.queue.remove(page_url)
+            Spider.crawled.add(page_url)
+            Spider.update_files()
+
     # Converts raw response data into readable information and checks for proper html formatting
     @staticmethod
     def gather_links(base_url, page_url):
@@ -94,6 +115,8 @@ class Spider:
 
         is_same_domain = True
         for url in links:
+            print("Now Crawling : " + url)
+
             if (url in Spider.queue) or (url in Spider.crawled):
                 continue
             for i in range(len(Spider.base_url) - 1):
@@ -105,6 +128,9 @@ class Spider:
                 Spider.queue.add(url)
             else:
                 is_same_domain = True
+        print(Spider.queue)
+        print("ENTER")
+        print(Spider.crawled)
 
     @staticmethod
     def find_links_in_linear(base_url, userid, num):
@@ -180,6 +206,70 @@ class Spider:
         # 추가되지않고 남아있는 url을 모두 update해준다.
         Spider.update_files()
         '''
+    # blogspot 동적 페이지 용 크롤러
+    @staticmethod
+    def add_links_in_sync_web(links):
+        is_same_domain = True
+
+        for url in links:
+            if (url in Spider.queue) or (url in Spider.crawled):
+                continue
+            # .com, .kr이 다르더라도 id, platform이 같은 경우는
+            # 같은 블로그의 글로 취급한다.
+            for i in range(len(Spider.base_url) - 4):
+                if Spider.domain_name[i] != get_domain_name(url)[i]:
+                    is_same_domain = False
+                    break
+
+            if (is_same_domain):
+                Spider.queue.add(url)
+            else:
+                is_same_domain = True
+
+    @staticmethod
+    def gather_links_in_sync_web(page_url, driver):
+        page_links = set()
+        openurl = "window.open('{url}');"
+        openurl = openurl.format(url = page_url)
+        try:
+            driver.execute_script(openurl)
+            driver.switch_to.window(driver.window_handles[-1])
+            raw_links = driver.find_elements_by_xpath("//a[@href]")
+            for link in raw_links:
+                print("Crawl : " + link.get_attribute("href"))
+                page_links.add(link.get_attribute("href"))
+
+        except Exception as e:
+            print(str(e))
+            return set()
+
+        return page_links
+
+
+    # medium 페이지 용 크롤러 (도메인 판별)
+    @staticmethod
+    def gather_links_in_medium(base_url, page_url):
+        page_links = set()
+        uid = Spider.get_blogger_ID(base_url)
+
+        try:
+            req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
+            soup = BeautifulSoup(urlopen(req), 'html.parser')
+            res = soup.find_all('a', href=True)
+
+            for link in res:
+                if link.get('href')[1:len(uid)+1] == uid:
+                    page_links.add(parse.urljoin(base_url, link.get('href')[len(uid)+1:]))
+                elif link.get('href')[0:3] == '/p/':
+                    page_links.add(base_url + link.get('href')[2: link.get('href').find("?")])
+                else:
+                    continue
+        except Exception as e:
+            print(str(e))
+            return set()
+
+        return page_links
+
     @staticmethod
     def update_files():
         set_to_file(Spider.queue, Spider.queue_file)

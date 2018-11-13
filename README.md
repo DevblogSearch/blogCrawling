@@ -56,6 +56,7 @@ path = "webdriver가 설치된 위치"
 (db.yml 파일 사용 시 주석처리 필요)
 
 ※ db.yml 파일 사용 시 주석처리 해줘야 함.
+
         elif Pdomain_name[-2] == "blogspot":
             path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
 

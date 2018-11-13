@@ -45,3 +45,22 @@ txt파일로 저장된 url을 열어 페이지의 내용을 얻어올 때 이용
 main.py에서 db.yml파일에 있는 블로그들의 url을 넘겨줍니다.
 
 다른 url에서 이용하기 위해서는 db.yml에 있는 형식으로 url과 name을 추가하면 가능합니다.
+
+chrome webdriver 설치 후, spider.py의
+path = "webdriver가 설치된 위치"
+를 변경해주면 동적 blogspot 또한 크롤링 가능합니다.
+(db.yml 파일 사용 시 주석처리 필요)
+# db.yml 파일 사용 시 주석처리 해줘야 함.
+        elif Pdomain_name[-2] == "blogspot":
+            path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
+
+            options = webdriver.ChromeOptions()
+            options.add_argument("--headless")
+
+            driver = webdriver.Chrome(executable_path = path, chrome_options = options)
+            Spider.add_links_in_sync_web(Spider.gather_links_in_sync_web(page_url, driver))
+
+            driver.close()
+            Spider.queue.remove(page_url)
+            Spider.crawled.add(page_url)
+            Spider.update_files()

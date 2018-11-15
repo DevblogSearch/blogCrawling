@@ -5,7 +5,6 @@ from domain import *
 from general import *
 from selenium import webdriver
 import requests
-import itertools
 
 
 class Spider:
@@ -220,21 +219,22 @@ class Spider:
     def add_links_in_sync_web(links):
         is_same_domain = True
 
-        for url in links:
-            if (url in Spider.queue) or (url in Spider.crawled):
-                continue
-            # .com, .kr이 다르더라도 id, platform이 같은 경우는
-            # 같은 블로그의 글로 취급한다.
-            for i in range(len(Spider.base_url) - 4):
-                if Spider.domain_name[i] != get_domain_name(url)[i]:
-                    is_same_domain = False
-                    break
+        try:
+            for url in links:
+                if (url in Spider.queue) or (url in Spider.crawled):
+                    continue
+                # .com, .kr이 다르더라도 id, platform이 같은 경우는
+                # 같은 블로그의 글로 취급한다.
+                for i in range(len(Spider.base_url) - 3):
+                    if Spider.domain_name[i] != get_domain_name(url)[i]:
+                        is_same_domain = False
+                        break
 
-            if (is_same_domain):
-                Spider.queue.add(url)
-            else:
-                is_same_domain = True
-
+                if (is_same_domain): Spider.queue.add(url)
+                else: is_same_domain = True
+        except Exception as e:
+            print(str(e))
+            return
     @staticmethod
     def gather_links_in_sync_web(page_url, driver):
         page_links = set()
@@ -251,6 +251,8 @@ class Spider:
         except Exception as e:
             print(str(e))
             return set()
+
+        return page_links
 
     @staticmethod
     def add_links_in_medium(links):

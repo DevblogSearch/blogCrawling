@@ -111,11 +111,11 @@ class Spider:
             for link in res:
                 url = parse.urljoin(base_url, link.get('href'))
                 page_links.add(url)
-
         except Exception as e:
             print(str(e))
             return set()
 
+        print(page_links)
         return page_links
 
     # Saves queue data to project files
@@ -128,6 +128,9 @@ class Spider:
 
             if (url in Spider.queue) or (url in Spider.crawled):
                 continue
+            if (url.find("https") == 0):
+                url = url.replace("https", "http")
+
             for i in range(len(Spider.base_url) - 1):
                 if Spider.domain_name[i] != get_domain_name(url)[i]:
                     is_same_domain = False
@@ -137,9 +140,6 @@ class Spider:
                 Spider.queue.add(url)
             else:
                 is_same_domain = True
-        print(Spider.queue)
-        print("ENTER")
-        print(Spider.crawled)
 
     @staticmethod
     def find_links_in_linear(base_url, userid, num):

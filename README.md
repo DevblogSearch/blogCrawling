@@ -40,6 +40,15 @@ url의 도메인 부분(netloc)만 얻을 때 이용합니다.
 
 txt파일로 저장된 url을 열어 페이지의 내용을 얻어올 때 이용합니다.
 
+# 기본 설정
+selenium, beautifulsoup 이용
+
+pip selenium package
+
+pip install selenium
+
+BeautifulSoup은 pip install bs4로 설치
+
 # 이용 방법
 
 main.py에서 원하는 블로그 플랫폼이 저장된 yml 파일을 입력 값으로 넣어줍니다.
@@ -48,9 +57,9 @@ main.py에서 원하는 블로그 플랫폼이 저장된 yml 파일을 입력 �
 
 다른 url에서 이용하기 위해서는 yml 파일에 있는 형식으로 url과 name을 추가하면 가능합니다.
 
-chrome webdriver 설치 후, spider.py의
+chrome webdriver 설치 후 (설치 : https://sites.google.com/a/chromium.org/chromedriver/downloads)
 
-path = "webdriver가 설치된 위치" 를 변경해주면 동적 blogspot 또한 크롤링 가능합니다.
+spider.py의 path = "webdriver가 설치된 위치" 를 변경해주면 동적 blogspot 또한 크롤링 가능합니다.
 
 ※ db.yml 파일 사용 시 주석처리 해줘야 함. (spider.py)
 

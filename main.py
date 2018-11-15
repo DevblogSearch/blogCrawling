@@ -1,28 +1,15 @@
 import threading
 import yaml
-import requests
-from bs4 import BeautifulSoup
 from queue import Queue
 from spider import Spider
 from domain import *
 from general import *
 
-
-'''
-PROJECT_NAME = 'channy'
-HOMEPAGE = 'http://channy.creation.net'
-DOMAIN_NAME = get_domain_name(HOMEPAGE)
-QUEUE_FILE = PROJECT_NAME + '/queue.txt'
-CRAWLED_FILE = PROJECT_NAME + '/crawled.txt'
-NUMBER_OF_THREADS = 8
-queue = Queue()
-Spider(PROJECT_NAME, HOMEPAGE, DOMAIN_NAME)
-    '''
-stream = open('db_naver.yml', 'r', encoding="UTF8")
+stream = open('test2.yml', 'r', encoding="UTF8")
 data = yaml.load(stream)
-NUMBER_OF_THREADS = 8
+NUMBER_OF_THREADS = 1
 # db.yml = 1019 // db_naver_yml = 35 // db_sync_blogspot = 3
-NUMBER_OF_BLOGGERS = 1
+NUMBER_OF_BLOGGERS = 2
 
 # Create worker threads (will die when main exits)
 def create_workers():
@@ -71,4 +58,3 @@ for person in range(NUMBER_OF_BLOGGERS):
         crawl()
 
     except: pass
-

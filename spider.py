@@ -5,6 +5,7 @@ from domain import *
 from general import *
 from selenium import webdriver
 import requests
+import time
 
 
 class Spider:
@@ -43,7 +44,6 @@ class Spider:
     # Updates user display, fills queue and updates files
     @staticmethod
     def crawl_page(thread_name, page_url):
-        if page_url not in Spider.crawled:
             Pdomain_name = get_sub_domain_name(page_url).split('.')
 
             # medium 블로그 크롤링 시 이용
@@ -51,10 +51,13 @@ class Spider:
                 path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
 
                 options = webdriver.ChromeOptions()
-                options.add_argument("--headless")
+                options.add_argument('--headless')
+                options.add_argument('--window-size=1920x1080')
+                options.add_argument('--disable-gpu')
 
-                driver = webdriver.Chrome(executable_path=path, chrome_options=options)
+                driver = webdriver.Chrome(executable_path=path, options = options)
                 Spider.add_links_in_medium(Spider.gather_links_in_medium(Spider.base_url, driver))
+
                 driver.close()
 
                 Spider.queue.remove(page_url)
@@ -66,9 +69,12 @@ class Spider:
                 path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
 
                 options = webdriver.ChromeOptions()
-                options.add_argument("--headless")
+                options.add_argument('--headless')
+                options.add_argument('--window-size=1920x1080')
+                options.add_argument('--disable-gpu')
 
-                driver = webdriver.Chrome(executable_path=path, chrome_options=options)
+
+                driver = webdriver.Chrome(executable_path=path, options=options)
                 Spider.add_links_in_sync_web(Spider.gather_links_in_sync_web(page_url, driver))
 
                 driver.close()
@@ -218,11 +224,12 @@ class Spider:
     @staticmethod
     def add_links_in_sync_web(links):
         is_same_domain = True
-
         try:
             for url in links:
                 if (url in Spider.queue) or (url in Spider.crawled):
                     continue
+
+                print("Crawl : " + url)
                 # .com, .kr이 다르더라도 id, platform이 같은 경우는
                 # 같은 블로그의 글로 취급한다.
                 for i in range(len(Spider.base_url) - 3):
@@ -240,13 +247,16 @@ class Spider:
         page_links = set()
         openurl = "window.open('{url}');"
         openurl = openurl.format(url=page_url)
+
+
         try:
             driver.execute_script(openurl)
             driver.switch_to.window(driver.window_handles[-1])
             raw_links = driver.find_elements_by_xpath("//a[@href]")
             for link in raw_links:
-                print("Crawl : " + link.get_attribute("href"))
-                page_links.add(link.get_attribute("href"))
+                href = link.get_attribute("href")
+                if (href.count("/") >4 and href[-1] != "/"):
+                    page_links.add(href)
 
         except Exception as e:
             print(str(e))
@@ -269,8 +279,14 @@ class Spider:
         try:
             driver.execute_script(openurl)
             driver.switch_to.window(driver.window_handles[-1])
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            driver.implicitly_wait(5)
+
+            lenOfPage = driver.execute_script("window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;")
+            match = False
+            while (match == False):
+                lastCount = lenOfPage
+                time.sleep(3)
+                lenOfPage = driver.execute_script("window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;")
+                if lastCount == lenOfPage: match = True
 
             raw_links = driver.find_elements_by_xpath("//a[@href]")
             for link in raw_links:

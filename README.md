@@ -59,7 +59,7 @@ main.py에서 원하는 블로그 플랫폼이 저장된 yml 파일을 입력 �
 
 chrome webdriver 설치 후 (설치 : https://sites.google.com/a/chromium.org/chromedriver/downloads)
 
-spider.py의 path = "webdriver가 설치된 위치" 를 변경해주면 동적 blogspot 또한 크롤링 가능합니다.
+spider.py의 path = "webdriver가 설치된 위치" 를 변경해주면 동적 blog(blogspot, medium) 또한 크롤링 가능합니다.
 
 ※ db.yml 파일 사용 시 주석처리 해줘야 함. (spider.py)
 

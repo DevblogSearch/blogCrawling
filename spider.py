@@ -1,8 +1,10 @@
 from urllib.request import Request, urlopen
+from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from urllib import parse
 from domain import *
 from general import *
+from blog_parse import *
 from selenium import webdriver
 import requests
 import time
@@ -56,8 +58,7 @@ class Spider:
                 options.add_argument('--disable-gpu')
 
                 driver = webdriver.Chrome(executable_path=path, options = options)
-                Spider.add_links_in_medium(Spider.gather_links_in_medium(Spider.base_url, driver))
-
+                Spider.gather_links_in_medium(Spider.base_url, driver)
                 driver.close()
 
                 Spider.queue.remove(page_url)
@@ -73,9 +74,8 @@ class Spider:
                 options.add_argument('--window-size=1920x1080')
                 options.add_argument('--disable-gpu')
 
-
                 driver = webdriver.Chrome(executable_path=path, options=options)
-                Spider.add_links_in_sync_web(Spider.gather_links_in_sync_web(page_url, driver))
+                Spider.gather_links_in_sync_web(page_url, driver)
 
                 driver.close()
                 Spider.queue.remove(page_url)
@@ -99,7 +99,7 @@ class Spider:
             else:
                 # print(thread_name + ' now crawling ' + page_url)
                 # print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
-                Spider.add_links_to_queue(Spider.gather_links(Spider.base_url, page_url))
+                Spider.gather_links(Spider.base_url, page_url)
                 Spider.queue.remove(page_url)
                 Spider.crawled.add(page_url)
                 Spider.update_files()
@@ -108,7 +108,6 @@ class Spider:
     @staticmethod
     def gather_links(base_url, page_url):
 
-        page_links = set()
         try:
             req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
             soup = BeautifulSoup(urlopen(req), 'html.parser')
@@ -116,36 +115,32 @@ class Spider:
 
             for link in res:
                 url = parse.urljoin(base_url, link.get('href'))
-                page_links.add(url)
+                Spider.add_links_to_queue(url, urlopen(req))
+
         except Exception as e:
             print(str(e))
             return set()
 
-        print(page_links)
-        return page_links
-
     # Saves queue data to project files
     @staticmethod
-    def add_links_to_queue(links):
-
+    def add_links_to_queue(link, html):
         is_same_domain = True
-        for url in links:
-            print("Now Crawling : " + url)
+        print("Now Crawling : " + link)
 
-            if (url in Spider.queue) or (url in Spider.crawled):
-                continue
-            if (url.find("https") == 0):
-                url = url.replace("https", "http")
+        if (link in Spider.queue) or (link in Spider.crawled):
+            return
+        if (link.find("https") == 0):
+            link = link.replace("https", "http")
+        for i in range(len(Spider.base_url) - 1):
+            if Spider.domain_name[i] != get_domain_name(link)[i]:
+                is_same_domain = False
+                break
 
-            for i in range(len(Spider.base_url) - 1):
-                if Spider.domain_name[i] != get_domain_name(url)[i]:
-                    is_same_domain = False
-                    break
-
-            if (is_same_domain):
-                Spider.queue.add(url)
-            else:
-                is_same_domain = True
+        if (is_same_domain):
+            Spider.queue.add(link)
+            blog_parse(urlparse(Spider.base_url).netloc, link, html)
+        else:
+            is_same_domain = True
 
     @staticmethod
     def find_links_in_linear(base_url, userid, num):
@@ -170,6 +165,8 @@ class Spider:
                 print("Now Crawling : " + url)
                 Spider.crawled.add(url)
                 size_of_block += 1
+                blog_parse(urlparse(Spider.base_url).netloc, url, r.text)
+
                 if (size_of_block >= 10):
                     Spider.update_files()
                     size_of_block = 0
@@ -206,6 +203,7 @@ class Spider:
                             Spider.crawled.add(redirection_url_format.format(blogid=userid, log_No=logNo))
                         # crawled.txt에 url 추가 후 size_of_block +1
                         size_of_block += 1
+                        blog_parse(urlparse(Spider.base_url).netloc, redirection_url_format.format(blogid=userid, log_No=logNo), r.text)
 
                     # if crawler gathers 50 links in the queue, update crawled.txt file.
                     if (size_of_block >= 10):
@@ -222,32 +220,34 @@ class Spider:
 
     # blogspot 동적 페이지 용 크롤러
     @staticmethod
-    def add_links_in_sync_web(links):
+    def add_links_in_sync_web(link, driver):
         is_same_domain = True
         try:
-            for url in links:
-                if (url in Spider.queue) or (url in Spider.crawled):
-                    continue
+            if (link in Spider.queue) or (link in Spider.crawled):
+                return
 
-                print("Crawl : " + url)
-                # .com, .kr이 다르더라도 id, platform이 같은 경우는
-                # 같은 블로그의 글로 취급한다.
-                for i in range(len(Spider.base_url) - 3):
-                    if Spider.domain_name[i] != get_domain_name(url)[i]:
-                        is_same_domain = False
-                        break
+            print("Crawl : " + link)
+            # .com, .kr이 다르더라도 id, platform이 같은 경우는
+            # 같은 블로그의 글로 취급한다.
+            for i in range(len(Spider.base_url) - 3):
+                if Spider.domain_name[i] != get_domain_name(link)[i]:
+                    is_same_domain = False
+                    break
 
-                if (is_same_domain): Spider.queue.add(url)
-                else: is_same_domain = True
+                if (is_same_domain):
+                    Spider.queue.add(link)
+                    Spider.parse_sync_blogspot(urlparse(Spider.base_url).netloc, link, driver)
+                else:
+                    is_same_domain = True
+
         except Exception as e:
             print(str(e))
             return
+
     @staticmethod
     def gather_links_in_sync_web(page_url, driver):
-        page_links = set()
         openurl = "window.open('{url}');"
         openurl = openurl.format(url=page_url)
-
 
         try:
             driver.execute_script(openurl)
@@ -256,23 +256,18 @@ class Spider:
             for link in raw_links:
                 href = link.get_attribute("href")
                 if (href.count("/") >4 and href[-1] != "/"):
-                    page_links.add(href)
+                    Spider.add_links_in_sync_web(href, driver)
 
         except Exception as e:
             print(str(e))
-            return set()
-
-        return page_links
 
     @staticmethod
-    def add_links_in_medium(links):
-        for url in links:
-            Spider.crawled.add(url)
+    def add_links_in_medium(link):
+        Spider.crawled.add(link)
 
     # medium 페이지 용 크롤러 (도메인 판별)
     @staticmethod
     def gather_links_in_medium(base_url, driver):
-        page_links = set()
         openurl = "window.open('{url}');"
         openurl = openurl.format(url=base_url)
 
@@ -294,14 +289,26 @@ class Spider:
                 if (href.find('/p/') != -1):
                     href = base_url + "/" + href[href.find('/p/')+ 3: href.find('?')]
                     print("Crawl : " + href)
-                    page_links.add(href)
+                    Spider.add_links_in_medium(href)
+                    html = requests.get(href)
+                    html = html.text
+
+                    blog_parse(Spider.base_url, href, html)
 
         except Exception as e:
             print(str(e))
-            return set()
-        return page_links
 
     @staticmethod
     def update_files():
         set_to_file(Spider.queue, Spider.queue_file)
         set_to_file(Spider.crawled, Spider.crawled_file)
+
+    @staticmethod
+    def parse_sync_blogspot(base_url, page_url, driver):
+        d = {}
+        d['blog'] = base_url
+        d['url'] = page_url
+        d['title'] = driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/h3')[0].text
+        d['content'] = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]')[0].text
+
+        return d

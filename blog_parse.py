@@ -49,7 +49,7 @@ def wordpress_parse(soup):
         else:
             wordpress_content = soup.find('div', {'id':'single'}).text
     else:
-        wordpress_content = soup.find('div', {'class':'entry-content'})
+        wordpress_content = soup.find('div', {'class':'entry-content'}).text
     return wordpress_content
 
 def medium_parse(soup):
@@ -67,6 +67,7 @@ def brunch_parse(soup):
 
 def parse_content(base_url, page_url, html):
     soup = BeautifulSoup(html, 'html.parser')
+    [s.extract() for s in soup('script')]
     d = {}
     d['blog'] = base_url
     d['url'] = page_url
@@ -85,7 +86,7 @@ def parse_content(base_url, page_url, html):
         d['content'] = medium_parse(soup)
     else:
         d['content'] = soup.body.text
-        
+
     buffered_document_send(d)
 
 def buffered_document_send(data):

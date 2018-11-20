@@ -85,8 +85,7 @@ def parse_content(base_url, page_url, html):
         d['content'] = medium_parse(soup)
     else:
         d['content'] = soup.body.text
-    return d
-
+        
     buffered_document_send(d)
 
 def buffered_document_send(data):

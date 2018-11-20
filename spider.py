@@ -115,7 +115,8 @@ class Spider:
 
             for link in res:
                 url = parse.urljoin(base_url, link.get('href'))
-                Spider.add_links_to_queue(url, urlopen(req))
+                r = requests.get(link)
+                Spider.add_links_to_queue(url, r.text)
 
         except Exception as e:
             print(str(e))
@@ -138,7 +139,7 @@ class Spider:
 
         if (is_same_domain):
             Spider.queue.add(link)
-            blog_parse(urlparse(Spider.base_url).netloc, link, html)
+            parse_content(urlparse(Spider.base_url).netloc, link, html)
         else:
             is_same_domain = True
 
@@ -165,7 +166,7 @@ class Spider:
                 print("Now Crawling : " + url)
                 Spider.crawled.add(url)
                 size_of_block += 1
-                blog_parse(urlparse(Spider.base_url).netloc, url, r.text)
+                parse_content(urlparse(Spider.base_url).netloc, url, r.text)
 
                 if (size_of_block >= 10):
                     Spider.update_files()
@@ -203,7 +204,8 @@ class Spider:
                             Spider.crawled.add(redirection_url_format.format(blogid=userid, log_No=logNo))
                         # crawled.txt에 url 추가 후 size_of_block +1
                         size_of_block += 1
-                        blog_parse(urlparse(Spider.base_url).netloc, redirection_url_format.format(blogid=userid, log_No=logNo), r.text)
+                        req = requests.get(redirection_url_format.format(blogid=userid, log_No=logNo))
+                        parse_content(urlparse(Spider.base_url).netloc, redirection_url_format.format(blogid=userid, log_No=logNo), req.text)
 
                     # if crawler gathers 50 links in the queue, update crawled.txt file.
                     if (size_of_block >= 10):
@@ -236,7 +238,10 @@ class Spider:
 
             if (is_same_domain):
                 Spider.queue.add(link)
+                driver.execute_script(link)
                 bufferd_document_send(Spider.parse_sync_blogspot(urlparse(Spider.base_url).netloc, link, driver))
+                driver.close()
+                driver.switch_to.window(driver.window_handles[-1])
             else:
                 is_same_domain = True
 
@@ -293,7 +298,7 @@ class Spider:
                     html = requests.get(href)
                     html = html.text
 
-                    blog_parse(Spider.base_url, href, html)
+                    parse_content(Spider.base_url, href, html)
 
         except Exception as e:
             print(str(e))

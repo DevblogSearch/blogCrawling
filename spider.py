@@ -59,7 +59,7 @@ class Spider:
 
                 driver = webdriver.Chrome(executable_path=path, options = options)
                 Spider.gather_links_in_medium(Spider.base_url, driver)
-                driver.close()
+                driver.quit()
 
                 Spider.queue.remove(page_url)
                 Spider.crawled.add(page_url)
@@ -78,7 +78,7 @@ class Spider:
                 driver = webdriver.Chrome(executable_path=path, options=options)
                 Spider.gather_links_in_sync_web(page_url, driver)
 
-                driver.close()
+                driver.quit()
                 Spider.queue.remove(page_url)
                 Spider.crawled.add(page_url)
                 Spider.update_files()

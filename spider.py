@@ -67,6 +67,7 @@ class Spider:
 
             # db.yml 파일 사용 시 주석처리 해줘야 함.
             elif Pdomain_name[-2] == "blogspot":
+                
                 path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
 
                 options = webdriver.ChromeOptions()
@@ -256,6 +257,7 @@ class Spider:
         try:
             driver.execute_script(openurl)
             driver.switch_to.window(driver.window_handles[-1])
+            time.sleep(2)
             raw_links = driver.find_elements_by_xpath("//a[@href]")
             for link in raw_links:
                 href = link.get_attribute("href")
@@ -315,4 +317,5 @@ class Spider:
         d['title'] = driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/h3')[0].text
         d['content'] = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]')[0].text
 
+        print(d)
         return d

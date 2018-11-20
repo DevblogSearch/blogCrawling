@@ -7,7 +7,6 @@ BUFFER_SIZE = 10
 DOC_UPDATE_URL = "http://127.0.0.1:3000/document"
 
 def naver_parse(soup):
-    print("naver_parse")
     naver_content = ''
     if soup.find('div', {'id': 'postViewArea'}) == None:
         data = soup.findAll('div', {'class': 'se_textView'})
@@ -19,7 +18,6 @@ def naver_parse(soup):
             elif (content.text != '\n\n'):
                 naver_content += content.text
     else:
-        print("NOt Found")
         naver_content = soup.find('div', {'id': 'postViewArea'}).text
 
     print(naver_content)
@@ -92,8 +90,7 @@ def parse_content(base_url, page_url, html):
     else:
         d['content'] = soup.body.text
 
-    print(d)
-    #buffered_document_send(d)
+    buffered_document_send(d)
 
 def buffered_document_send(data):
     headers = {'Content-Type': 'application/json', 'Accept':'application/json', 'charset':'utf-8'}

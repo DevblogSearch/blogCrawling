@@ -115,8 +115,8 @@ class Spider:
 
             for link in res:
                 url = parse.urljoin(base_url, link.get('href'))
-                r = requests.get(link)
-                Spider.add_links_to_queue(url, r.text)
+                r = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
+                Spider.add_links_to_queue(url, urlopen(r))
 
         except Exception as e:
             print(str(e))
@@ -186,7 +186,7 @@ class Spider:
                 redirected_url = soup.find_all('a', {'class': 'fil5 pcol2'})
                 redirected_url += soup.find_all('a', {
                     'class': "url pcol2 _setClipboard _returnFalse _se3copybtn _transPosition"})
-
+                
                 redirection_url_format = "https://blog.naver.com/PostView.nhn?blogId={blogid}&logNo={log_No}&categoryNo=0&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=menu"
 
                 try:
@@ -206,7 +206,6 @@ class Spider:
                         size_of_block += 1
                         req = requests.get(redirection_url_format.format(blogid=userid, log_No=logNo))
                         parse_content(urlparse(Spider.base_url).netloc, redirection_url_format.format(blogid=userid, log_No=logNo), req.text)
-
                     # if crawler gathers 50 links in the queue, update crawled.txt file.
                     if (size_of_block >= 10):
                         Spider.update_files()

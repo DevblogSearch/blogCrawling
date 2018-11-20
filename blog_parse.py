@@ -7,9 +7,11 @@ BUFFER_SIZE = 10
 DOC_UPDATE_URL = "http://127.0.0.1:3000/document"
 
 def naver_parse(soup):
+    print("naver_parse")
     naver_content = ''
     if soup.find('div', {'id': 'postViewArea'}) == None:
         data = soup.findAll('div', {'class': 'se_textView'})
+        print(data)
         TF = 1
         for content in data:
             if (TF):
@@ -17,8 +19,10 @@ def naver_parse(soup):
             elif (content.text != '\n\n'):
                 naver_content += content.text
     else:
+        print("NOt Found")
         naver_content = soup.find('div', {'id': 'postViewArea'}).text
 
+    print(naver_content)
     return naver_content
 
 def tistory_parse(soup):
@@ -66,28 +70,30 @@ def brunch_parse(soup):
     return brunch_content
 
 def parse_content(base_url, page_url, html):
+    print("함수진입")
     soup = BeautifulSoup(html, 'html.parser')
     [s.extract() for s in soup('script')]
     d = {}
     d['blog'] = base_url
     d['url'] = page_url
     d['title'] = soup.title.text
-    if(base_url == 'blog.naver.com/'):
+    if(base_url == 'blog.naver.com'):
         d['content'] = naver_parse(soup)
-    elif(base_url == 'tistory.com/'):
+    elif(base_url == 'tistory.com'):
         d['content'] = tistory_parse(soup)
-    elif(base_url == 'blogspot.com/'):
+    elif(base_url == 'blogspot.com'):
         d['content'] = blogspot_parse(soup)
-    elif(base_url == 'wordpress.com/'):
+    elif(base_url == 'wordpress.com'):
         d['content'] = wordpress_parse(soup)
-    elif(base_url == 'brunch.co.kr/'):
+    elif(base_url == 'brunch.co.kr'):
         d['content'] = brunch_parse(soup)
-    elif(base_url == 'medium.com/'):
+    elif(base_url == 'medium.com'):
         d['content'] = medium_parse(soup)
     else:
         d['content'] = soup.body.text
 
-    buffered_document_send(d)
+    print(d)
+    #buffered_document_send(d)
 
 def buffered_document_send(data):
     headers = {'Content-Type': 'application/json', 'Accept':'application/json', 'charset':'utf-8'}

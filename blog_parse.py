@@ -10,7 +10,6 @@ def naver_parse(soup):
     naver_content = ''
     if soup.find('div', {'id': 'postViewArea'}) == None:
         data = soup.findAll('div', {'class': 'se_textView'})
-        print(data)
         TF = 1
         for content in data:
             if (TF):
@@ -68,7 +67,7 @@ def brunch_parse(soup):
     return brunch_content
 
 def parse_content(base_url, page_url, html):
-    print("함수진입")
+
     soup = BeautifulSoup(html, 'html.parser')
     [s.extract() for s in soup('script')]
     d = {}

@@ -234,11 +234,11 @@ class Spider:
                     is_same_domain = False
                     break
 
-                if (is_same_domain):
-                    Spider.queue.add(link)
-                    Spider.parse_sync_blogspot(urlparse(Spider.base_url).netloc, link, driver)
-                else:
-                    is_same_domain = True
+            if (is_same_domain):
+                Spider.queue.add(link)
+                bufferd_document_send(Spider.parse_sync_blogspot(urlparse(Spider.base_url).netloc, link, driver))
+            else:
+                is_same_domain = True
 
         except Exception as e:
             print(str(e))

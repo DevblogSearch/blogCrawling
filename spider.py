@@ -6,6 +6,8 @@ from domain import *
 from general import *
 from blog_parse import *
 from selenium import webdriver
+from selenium.common.exceptions import StaleElementReferenceException
+import itertools
 import requests
 import time
 
@@ -46,64 +48,63 @@ class Spider:
     # Updates user display, fills queue and updates files
     @staticmethod
     def crawl_page(thread_name, page_url):
-            Pdomain_name = get_sub_domain_name(page_url).split('.')
+        Pdomain_name = get_sub_domain_name(page_url).split('.')
 
-            # medium 블로그 크롤링 시 이용
-            if Pdomain_name[-2] == "medium":
-                path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
+        # medium 블로그 크롤링 시 이용
+        if Pdomain_name[-2] == "medium":
+            path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
 
-                options = webdriver.ChromeOptions()
-                options.add_argument('--headless')
-                options.add_argument('--window-size=1920x1080')
-                options.add_argument('--disable-gpu')
+            options = webdriver.ChromeOptions()
+            options.add_argument('--headless')
+            options.add_argument('--window-size=1920x1080')
+            options.add_argument('--disable-gpu')
 
-                driver = webdriver.Chrome(executable_path=path, options = options)
-                Spider.gather_links_in_medium(Spider.base_url, driver)
-                driver.quit()
+            driver = webdriver.Chrome(executable_path=path, options=options)
+            Spider.gather_links_in_medium(Spider.base_url, driver)
+            driver.quit()
 
-                Spider.queue.remove(page_url)
-                Spider.crawled.add(page_url)
-                Spider.update_files()
+            Spider.queue.remove(page_url)
+            Spider.crawled.add(page_url)
+            Spider.update_files()
 
-            # db.yml 파일 사용 시 주석처리 해줘야 함.
-            elif Pdomain_name[-2] == "blogspot":
-                
-                path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
+        # db.yml 파일 사용 시 주석처리 해줘야 함.
+        elif Pdomain_name[-2] == "blogspot":
 
-                options = webdriver.ChromeOptions()
-                options.add_argument('--headless')
-                options.add_argument('--window-size=1920x1080')
-                options.add_argument('--disable-gpu')
+            path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
 
-                driver = webdriver.Chrome(executable_path=path, options=options)
-                Spider.gather_links_in_sync_web(page_url, driver)
+            options = webdriver.ChromeOptions()
+            options.add_argument('--headless')
+            options.add_argument('--window-size=1920x1080')
+            options.add_argument('--disable-gpu')
 
-                driver.quit()
-                Spider.queue.remove(page_url)
-                Spider.crawled.add(page_url)
-                Spider.update_files()
+            driver = webdriver.Chrome(executable_path=path, options=options)
+            Spider.gather_links_in_sync_web(page_url, driver)
 
-            # blog.naver.com // brunch.co.kr 전용 크롤링
-            # naver 일 때, linear함수의 int 인자값으로 0, brunch 일 때, 인자값으로 1 입력
-            elif (len(Pdomain_name) > 2 and
-                  (Pdomain_name[-3] == "brunch" or Pdomain_name[-2] == "naver")):
+            driver.quit()
+            Spider.queue.remove(page_url)
+            Spider.update_files()
 
-                idx = 0
-                if (Pdomain_name[-3] == "brunch"): idx = 1
+        # blog.naver.com // brunch.co.kr 전용 크롤링
+        # naver 일 때, linear함수의 int 인자값으로 0, brunch 일 때, 인자값으로 1 입력
+        elif (len(Pdomain_name) > 2 and
+              (Pdomain_name[-3] == "brunch" or Pdomain_name[-2] == "naver")):
 
-                Spider.user_id = Spider.get_blogger_ID(Spider.base_url)
-                Spider.find_links_in_linear(page_url, Spider.user_id, idx)
-                Spider.queue.remove(page_url)
-                Spider.update_files()
+            idx = 0
+            if (Pdomain_name[-3] == "brunch"): idx = 1
 
-            # 그 외 블로그 크롤링 시 사용하는 코드
-            else:
-                # print(thread_name + ' now crawling ' + page_url)
-                # print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
-                Spider.gather_links(Spider.base_url, page_url)
-                Spider.queue.remove(page_url)
-                Spider.crawled.add(page_url)
-                Spider.update_files()
+            Spider.user_id = Spider.get_blogger_ID(Spider.base_url)
+            Spider.find_links_in_linear(page_url, Spider.user_id, idx)
+            Spider.queue.remove(page_url)
+            Spider.update_files()
+
+        # 그 외 블로그 크롤링 시 사용하는 코드
+        else:
+            # print(thread_name + ' now crawling ' + page_url)
+            # print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
+            Spider.gather_links(Spider.base_url, page_url)
+            Spider.queue.remove(page_url)
+            Spider.crawled.add(page_url)
+            Spider.update_files()
 
     # Converts raw response data into readable information and checks for proper html formatting
     @staticmethod
@@ -187,7 +188,7 @@ class Spider:
                 redirected_url = soup.find_all('a', {'class': 'fil5 pcol2'})
                 redirected_url += soup.find_all('a', {
                     'class': "url pcol2 _setClipboard _returnFalse _se3copybtn _transPosition"})
-                
+
                 redirection_url_format = "https://blog.naver.com/PostView.nhn?blogId={blogid}&logNo={log_No}&categoryNo=0&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=menu"
 
                 try:
@@ -206,7 +207,8 @@ class Spider:
                         # crawled.txt에 url 추가 후 size_of_block +1
                         size_of_block += 1
                         req = requests.get(redirection_url_format.format(blogid=userid, log_No=logNo))
-                        parse_content(urlparse(Spider.base_url).netloc, redirection_url_format.format(blogid=userid, log_No=logNo), req.text)
+                        parse_content(urlparse(Spider.base_url).netloc,
+                                      redirection_url_format.format(blogid=userid, log_No=logNo), req.text)
                     # if crawler gathers 50 links in the queue, update crawled.txt file.
                     if (size_of_block >= 10):
                         Spider.update_files()
@@ -222,28 +224,18 @@ class Spider:
 
     # blogspot 동적 페이지 용 크롤러
     @staticmethod
-    def add_links_in_sync_web(link, driver):
+    def add_links_in_sync_web(link):
         is_same_domain = True
         try:
             if (link in Spider.queue) or (link in Spider.crawled):
-                return
-
-            print("Crawl : " + link)
+                return False
             # .com, .kr이 다르더라도 id, platform이 같은 경우는
             # 같은 블로그의 글로 취급한다.
             for i in range(len(Spider.base_url) - 3):
                 if Spider.domain_name[i] != get_domain_name(link)[i]:
-                    is_same_domain = False
-                    break
+                    return False
 
-            if (is_same_domain):
-                Spider.queue.add(link)
-                driver.execute_script(link)
-                bufferd_document_send(Spider.parse_sync_blogspot(urlparse(Spider.base_url).netloc, link, driver))
-                driver.close()
-                driver.switch_to.window(driver.window_handles[-1])
-            else:
-                is_same_domain = True
+            return is_same_domain
 
         except Exception as e:
             print(str(e))
@@ -254,18 +246,52 @@ class Spider:
         openurl = "window.open('{url}');"
         openurl = openurl.format(url=page_url)
 
-        try:
-            driver.execute_script(openurl)
-            driver.switch_to.window(driver.window_handles[-1])
-            time.sleep(2)
-            raw_links = driver.find_elements_by_xpath("//a[@href]")
-            for link in raw_links:
-                href = link.get_attribute("href")
-                if (href.count("/") >4 and href[-1] != "/"):
-                    Spider.add_links_in_sync_web(href, driver)
+        driver.execute_script(openurl)
+        driver.switch_to.window(driver.window_handles[-1])
+        time.sleep(1)
+        raw_links = driver.find_elements_by_xpath("//a[@href]")
 
-        except Exception as e:
-            print(str(e))
+        # 이미지 파일같은 쓸모없는 링크를 전부 제외한 set()을 만든다.
+        normal = set()
+        for i in range(len(raw_links)):
+            # 긁어온 URL이 image/ pdf/ javascript 인지 확인
+            isItImage = raw_links[i].get_attribute("href")
+            if (isItImage.find(".jpg") != -1 or isItImage.find(".png") != -1
+                or isItImage.find(".PNG") != -1 or isItImage.find("pdf") != -1
+                    or isItImage.find("javascript:void(0)") != -1 or isItImage.find("#") != -1
+                        or isItImage.find("feeds") != -1):
+                continue
+            # 긁어온 URL이 같은 도메인이 아닐 경우/ 이미 queue에 존재하는 경우 continue
+            if (Spider.add_links_in_sync_web(isItImage) != True):
+                continue
+            normal.add(isItImage)
+
+        i =0
+
+        while (i< len(normal)):
+            for link in normal:
+                try:
+                    # 글 하나만 존재하는 링크일 경우 parse_content 이후 서버에 보내준다.
+                    if (link.count("/") > 4 and
+                            (link.find("html") != -1 or link[-1] != "/")):
+                        Spider.crawled.add(link)
+                        openurl = "window.open('{url}');"
+                        openurl = openurl.format(url=link)
+                        driver.execute_script(openurl)
+                        driver.switch_to.window(driver.window_handles[-1])
+                        data = Spider.parse_sync_blogspot(urlparse(Spider.base_url).netloc, link, driver)
+                        buffered_document_send(data)
+
+                    # 글 하나가 존재하는 링크가 아니지만, 같은 블로그 내의 url일 경우 queue에 추가해서 다시 확인한다.
+                    else:
+                        Spider.queue.add(link)
+
+                    i += 1
+
+                except StaleElementReferenceException as e:
+                    i += 1
+                    print(str(e))
+
 
     @staticmethod
     def add_links_in_medium(link):
@@ -281,19 +307,21 @@ class Spider:
             driver.execute_script(openurl)
             driver.switch_to.window(driver.window_handles[-1])
 
-            lenOfPage = driver.execute_script("window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;")
+            lenOfPage = driver.execute_script(
+                "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;")
             match = False
             while (match == False):
                 lastCount = lenOfPage
                 time.sleep(3)
-                lenOfPage = driver.execute_script("window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;")
+                lenOfPage = driver.execute_script(
+                    "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;")
                 if lastCount == lenOfPage: match = True
 
             raw_links = driver.find_elements_by_xpath("//a[@href]")
             for link in raw_links:
                 href = link.get_attribute("href")
                 if (href.find('/p/') != -1):
-                    href = base_url + "/" + href[href.find('/p/')+ 3: href.find('?')]
+                    href = base_url + "/" + href[href.find('/p/') + 3: href.find('?')]
                     print("Crawl : " + href)
                     Spider.add_links_in_medium(href)
                     html = requests.get(href)
@@ -317,5 +345,4 @@ class Spider:
         d['title'] = driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/h3')[0].text
         d['content'] = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]')[0].text
 
-        print(d)
         return d

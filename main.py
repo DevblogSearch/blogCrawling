@@ -36,8 +36,8 @@ for person in range(NUMBER_OF_BLOGGERS):
         DOMAIN_NAME = data[person]['blog']
         Spider(PROJECT_NAME, HOMEPAGE, DOMAIN_NAME)
 
-        QUEUE_FILE = 'user/' + PROJECT_NAME + '/queue.txt'
-        CRAWLED_FILE = 'user/' + PROJECT_NAME + '/crawled.txt'
+        QUEUE_FILE = os.path.join('user' , PROJECT_NAME , 'queue.txt')
+        CRAWLED_FILE = os.path.join('user' , PROJECT_NAME , 'crawled.txt')
 
         while True:
             queued_links = file_to_set(QUEUE_FILE)

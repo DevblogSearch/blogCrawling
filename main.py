@@ -5,11 +5,11 @@ from spider import Spider
 from domain import *
 from general import *
 
-stream = open('test2.yml', 'r', encoding="UTF8")
+stream = open('db_sync_blogspot.yml', 'r', encoding="UTF8")
 data = yaml.load(stream)
 NUMBER_OF_THREADS = 1
 # db.yml = 1019 // db_naver_yml = 35 // db_sync_blogspot = 3
-NUMBER_OF_BLOGGERS = 2
+NUMBER_OF_BLOGGERS = 1
 
 # Create worker threads (will die when main exits)
 def create_workers():
@@ -50,8 +50,8 @@ for person in range(NUMBER_OF_BLOGGERS):
         DOMAIN_NAME = data[person]['blog']
         Spider(PROJECT_NAME, HOMEPAGE, DOMAIN_NAME)
 
-        QUEUE_FILE = PROJECT_NAME + '/queue.txt'
-        CRAWLED_FILE = PROJECT_NAME + '/crawled.txt'
+        QUEUE_FILE = 'user\\' + PROJECT_NAME + '/queue.txt'
+        CRAWLED_FILE = 'user\\' + PROJECT_NAME + '/crawled.txt'
         queue = Queue()
 
         create_workers()

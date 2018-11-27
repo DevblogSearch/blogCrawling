@@ -4,7 +4,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BUFFER_SIZE = 10
-DOC_UPDATE_URL = "http://127.0.0.1:3000/document"
+DOC_UPDATE_URL = "http://127.0.0.1:5000/document"
 
 def naver_parse(soup):
     naver_content = ''
@@ -66,9 +66,9 @@ def brunch_parse(soup):
         brunch_content += content.text
     return brunch_content
 
-def parse_content(base_url, page_url, html):
+def parse_content(base_url, page_url, soup):
 
-    soup = BeautifulSoup(html, 'html.parser')
+#    soup = BeautifulSoup(html, 'html.parser')
     [s.extract() for s in soup('script')]
     d = {}
     d['blog'] = base_url

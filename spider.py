@@ -8,6 +8,7 @@ from blog_parse import *
 from selenium import webdriver
 import requests
 import time
+import os
 
 
 class Spider:
@@ -21,12 +22,13 @@ class Spider:
     crawled = set()
 
     def __init__(self, project_name, base_url, domain_name):
-        Spider.project_name = 'user\\' + project_name
+        Spider.project_name = os.path.join('user', project_name)
         Spider.base_url = base_url
         Spider.domain_name = domain_name
-        Spider.queue_file = Spider.project_name + '/queue.txt'
-        Spider.crawled_file = Spider.project_name + '/crawled.txt'
+        Spider.queue_file = os.path.join(Spider.project_name, 'queue.txt')
+        Spider.crawled_file = os.path.join(Spider.project_name,'crawled.txt')
         self.boot()
+        self.queue.add(base_url)
         self.crawl_page('First spider', Spider.base_url)
 
     # Creates directory and files for project on first run and starts the spider
@@ -47,10 +49,13 @@ class Spider:
     @staticmethod
     def crawl_page(thread_name, page_url):
             Pdomain_name = get_sub_domain_name(page_url).split('.')
+            #length check about domain name
+            if len(Pdomain_name) < 2:
+                return
 
             # medium 블로그 크롤링 시 이용
             if Pdomain_name[-2] == "medium":
-                path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
+                path = "./chromedirver"
 
                 options = webdriver.ChromeOptions()
                 options.add_argument('--headless')
@@ -66,22 +71,22 @@ class Spider:
                 Spider.update_files()
 
             # db.yml 파일 사용 시 주석처리 해줘야 함.
-            elif Pdomain_name[-2] == "blogspot":
-                
-                path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
+            #elif Pdomain_name[-2] == "blogspot":
+            #    
+            #    path = "./chromedriver"
 
-                options = webdriver.ChromeOptions()
-                options.add_argument('--headless')
-                options.add_argument('--window-size=1920x1080')
-                options.add_argument('--disable-gpu')
+            #    options = webdriver.ChromeOptions()
+            #    options.add_argument('--headless')
+            #    options.add_argument('--window-size=1920x1080')
+            #    options.add_argument('--disable-gpu')
 
-                driver = webdriver.Chrome(executable_path=path, options=options)
-                Spider.gather_links_in_sync_web(page_url, driver)
+            #    driver = webdriver.Chrome(executable_path=path, options=options)
+            #    Spider.gather_links_in_sync_web(page_url, driver)
 
-                driver.quit()
-                Spider.queue.remove(page_url)
-                Spider.crawled.add(page_url)
-                Spider.update_files()
+            #    driver.quit()
+            #    Spider.queue.remove(page_url)
+            #    Spider.crawled.add(page_url)
+            #    Spider.update_files()
 
             # blog.naver.com // brunch.co.kr 전용 크롤링
             # naver 일 때, linear함수의 int 인자값으로 0, brunch 일 때, 인자값으로 1 입력
@@ -98,51 +103,63 @@ class Spider:
 
             # 그 외 블로그 크롤링 시 사용하는 코드
             else:
-                # print(thread_name + ' now crawling ' + page_url)
-                # print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
-                Spider.gather_links(Spider.base_url, page_url)
-                Spider.queue.remove(page_url)
-                Spider.crawled.add(page_url)
-                Spider.update_files()
+                print(thread_name + ' now crawling ' + page_url)
+                print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
+                try:
+                    Spider.gather_links(Spider.base_url, page_url)
+                    Spider.queue.remove(page_url)
+                    Spider.crawled.add(page_url)
+                    Spider.update_files()
+                except Exception as e:
+                    print('[ERROR:crawl_page] : ', e)
 
     # Converts raw response data into readable information and checks for proper html formatting
     @staticmethod
     def gather_links(base_url, page_url):
-
+        #maximum blog article is 200 per blog
+        if len(Spider.crawled) >= 200:
+            return
         try:
+            if page_url in Spider.crawled:
+                return 
             req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
-            soup = BeautifulSoup(urlopen(req), 'html.parser')
-            res = soup.find_all('a', href=True)
+            resp =  urlopen(req)
+            if resp.getcode() != 200:
+                print("return code is : ", resp.getcode())
+                return 
 
+            #TODO 앞에 부분만 검사
+            requested_url = resp.url.replace("https", "http")
+            if requested_url != page_url:
+                Spider.queue.remove(page_url)
+                return 
+
+            soup = BeautifulSoup(resp, 'html.parser')
+
+            res = soup.find_all('a', href=True)
             for link in res:
                 url = parse.urljoin(base_url, link.get('href'))
-                r = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
-                Spider.add_links_to_queue(url, urlopen(r))
+                Spider.add_links_to_queue(url)
+
+            parse_content(base_url, page_url, soup)
 
         except Exception as e:
-            print(str(e))
-            return set()
+            print("[ERROR:gather_links] : ",str(e))
+            return
 
     # Saves queue data to project files
     @staticmethod
-    def add_links_to_queue(link, html):
-        is_same_domain = True
-        print("Now Crawling : " + link)
-
+    def add_links_to_queue(link):
         if (link in Spider.queue) or (link in Spider.crawled):
             return
         if (link.find("https") == 0):
             link = link.replace("https", "http")
-        for i in range(len(Spider.base_url) - 1):
-            if Spider.domain_name[i] != get_domain_name(link)[i]:
-                is_same_domain = False
-                break
 
-        if (is_same_domain):
+        #cheking is same domain
+        link_domain = get_domain_name(link)[0:len(Spider.domain_name)]
+        if Spider.domain_name in link_domain and is_not_anchor_link(link):
             Spider.queue.add(link)
-            parse_content(urlparse(Spider.base_url).netloc, link, html)
-        else:
-            is_same_domain = True
+
 
     @staticmethod
     def find_links_in_linear(base_url, userid, num):
@@ -163,13 +180,13 @@ class Spider:
                     r.raise_for_status()
                 except requests.HTTPError as e:
                     print(e)
-                    break
+                    continue
                 print("Now Crawling : " + url)
                 Spider.crawled.add(url)
                 size_of_block += 1
                 parse_content(urlparse(Spider.base_url).netloc, url, r.text)
 
-                if (size_of_block >= 10):
+                if (size_of_block >= 1):
                     Spider.update_files()
                     size_of_block = 0
 
@@ -208,7 +225,7 @@ class Spider:
                         req = requests.get(redirection_url_format.format(blogid=userid, log_No=logNo))
                         parse_content(urlparse(Spider.base_url).netloc, redirection_url_format.format(blogid=userid, log_No=logNo), req.text)
                     # if crawler gathers 50 links in the queue, update crawled.txt file.
-                    if (size_of_block >= 10):
+                    if (size_of_block >= 1):
                         Spider.update_files()
                         size_of_block = 0
 
@@ -319,3 +336,10 @@ class Spider:
 
         print(d)
         return d
+
+
+
+def is_not_anchor_link(url):
+    if url.split('/')[-1].find('#') == 0:
+        return False
+    return True

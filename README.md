@@ -16,11 +16,13 @@
 
 <http://creativeworks.tistory.com/entry/Web-Crawler-001-Creating-a-New-Project?category=638090>
 
+
 # Overview
 
 한국 개발자 블로그 웹사이트의 크롤러 부분입니다.
 
 블로그는 https://github.com/sarojaba/awesome-devblog 의 db.yml 파일에서 데이터를 얻어오고 있습니다.
+
 
 # 소스 파일 설명
 
@@ -46,6 +48,7 @@ spider.py에서 넘겨준 url에 request를 보내
 
 이후 서버에 json 형태로 보내주는 파일입니다.
 
+
 # 기본 설정
 
 selenium, beautifulsoup 이용
@@ -57,6 +60,7 @@ pip install selenium
 BeautifulSoup은 pip install bs4로 설치
 
 Google Chrome, Chrome driver 설치 (선택)
+
 
 # 이용 방법
 

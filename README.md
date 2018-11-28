@@ -28,6 +28,8 @@
 
 크롤러의 실제적인 부분입니다. 블로그 url을 얻어 txt파일로 저장합니다.
 
+URL을 parse_content.py에 보내줍니다.
+
 *domain.py
 
 url의 도메인 부분(netloc)만 얻을 때 이용합니다.
@@ -38,9 +40,14 @@ url의 도메인 부분(netloc)만 얻을 때 이용합니다.
 
 *blog_parse.py
 
-txt파일로 저장된 url을 열어 페이지의 내용을 얻어올 때 이용합니다.
+spider.py에서 넘겨준 url에 request를 보내
+
+글 내용을 beautifulsoup로 가져와 딕셔너리 타입으로 저장합니다.
+
+이후 서버에 json 형태로 보내주는 파일입니다.
 
 # 기본 설정
+
 selenium, beautifulsoup 이용
 
 pip selenium package
@@ -48,6 +55,8 @@ pip selenium package
 pip install selenium
 
 BeautifulSoup은 pip install bs4로 설치
+
+Google Chrome, Chrome driver 설치 (선택)
 
 # 이용 방법
 

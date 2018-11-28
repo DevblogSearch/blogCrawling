@@ -21,6 +21,7 @@ class Spider:
     crawled_file = ''
     queue = set()
     crawled = set()
+    driver = None
 
     def __init__(self, project_name, base_url, domain_name):
         Spider.project_name = 'user\\' + project_name
@@ -28,6 +29,17 @@ class Spider:
         Spider.domain_name = domain_name
         Spider.queue_file = Spider.project_name + '/queue.txt'
         Spider.crawled_file = Spider.project_name + '/crawled.txt'
+
+        if (Spider.driver == None):
+            # selenium web browser 관련설정
+            path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
+            options = webdriver.ChromeOptions()
+            options.add_argument('--headless')
+            options.add_argument('--window-size=1920x1080')
+            options.add_argument('--disable-gpu')
+
+            Spider.driver = webdriver.Chrome(executable_path=path, options=options)
+
         self.boot()
         self.crawl_page('First spider', Spider.base_url)
 
@@ -52,35 +64,22 @@ class Spider:
 
         # medium 블로그 크롤링 시 이용
         if Pdomain_name[-2] == "medium":
-            path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
+            Spider.gather_links_in_medium(Spider.base_url, Spider.driver)
 
-            options = webdriver.ChromeOptions()
-            options.add_argument('--headless')
-            options.add_argument('--window-size=1920x1080')
-            options.add_argument('--disable-gpu')
-
-            driver = webdriver.Chrome(executable_path=path, options=options)
-            Spider.gather_links_in_medium(Spider.base_url, driver)
-            driver.quit()
-
+            Spider.driver.close()
             Spider.queue.remove(page_url)
             Spider.crawled.add(page_url)
             Spider.update_files()
 
         # db.yml 파일 사용 시 주석처리 해줘야 함.
         elif Pdomain_name[-2] == "blogspot":
+            Spider.gather_links_in_sync_web(page_url, Spider.driver)
+            
+            # 켜져있는 tab을 1개 빼고 모두 제거
+            for i in range(len(Spider.driver.window_handles)-1):
+                Spider.driver.close()
+                Spider.driver.switch_to.window(Spider.driver.window_handles[0])
 
-            path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
-
-            options = webdriver.ChromeOptions()
-            options.add_argument('--headless')
-            options.add_argument('--window-size=1920x1080')
-            options.add_argument('--disable-gpu')
-
-            driver = webdriver.Chrome(executable_path=path, options=options)
-            Spider.gather_links_in_sync_web(page_url, driver)
-
-            driver.quit()
             Spider.queue.remove(page_url)
             Spider.update_files()
 
@@ -100,50 +99,59 @@ class Spider:
         # 그 외 블로그 크롤링 시 사용하는 코드
         else:
             # print(thread_name + ' now crawling ' + page_url)
-            # print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
+            print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
             Spider.gather_links(Spider.base_url, page_url)
             Spider.queue.remove(page_url)
             Spider.crawled.add(page_url)
             Spider.update_files()
 
+    @staticmethod
+    def is_not_anchor_link(url):
+        # find('#') 값이 -1일 경우 발견하지 못함("#"이 string 내에 없음)을 의미한다.
+        if url.split('/')[-1].find('#') != -1:
+            return False
+        return True
+
     # Converts raw response data into readable information and checks for proper html formatting
     @staticmethod
     def gather_links(base_url, page_url):
-
+        # maximum blog article is 200 per blog
+        if len(Spider.crawled) >= 200:
+            return
         try:
-            req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
-            soup = BeautifulSoup(urlopen(req), 'html.parser')
-            res = soup.find_all('a', href=True)
+            if page_url in Spider.crawled:
+                return
+            try:
+                req = requests.get(page_url)
+                req.raise_for_status()
+            except requests.HTTPError as e:
+                print(e)
+                return
 
+            soup = BeautifulSoup(req.text, 'html.parser')
+            res = soup.find_all('a', href=True)
             for link in res:
                 url = parse.urljoin(base_url, link.get('href'))
-                r = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
-                Spider.add_links_to_queue(url, urlopen(r))
+                Spider.add_links_to_queue(url)
+
+            parse_content(base_url, page_url, soup)
 
         except Exception as e:
-            print(str(e))
-            return set()
+            print("[ERROR:gather_links] : ", str(e))
+            return
 
     # Saves queue data to project files
     @staticmethod
-    def add_links_to_queue(link, html):
-        is_same_domain = True
-        print("Now Crawling : " + link)
-
-        if (link in Spider.queue) or (link in Spider.crawled):
+    def add_links_to_queue(link):
+        if link in Spider.crawled:
             return
         if (link.find("https") == 0):
             link = link.replace("https", "http")
-        for i in range(len(Spider.base_url) - 1):
-            if Spider.domain_name[i] != get_domain_name(link)[i]:
-                is_same_domain = False
-                break
 
-        if (is_same_domain):
+        # cheking is same domain
+        link_domain = get_domain_name(link)[0:len(Spider.domain_name)]
+        if Spider.domain_name in link_domain and Spider.is_not_anchor_link(link):
             Spider.queue.add(link)
-            parse_content(urlparse(Spider.base_url).netloc, link, html)
-        else:
-            is_same_domain = True
 
     @staticmethod
     def find_links_in_linear(base_url, userid, num):
@@ -181,7 +189,6 @@ class Spider:
             # page를 1부터 증가시켜 100개의 page만 확인한다.
             while (page < 101):
                 url = Blog_platform.format(blog_id=userid, page=page)
-
                 r = requests.get(url)
                 soup = BeautifulSoup(r.text, 'html.parser')
 
@@ -190,7 +197,6 @@ class Spider:
                     'class': "url pcol2 _setClipboard _returnFalse _se3copybtn _transPosition"})
 
                 redirection_url_format = "https://blog.naver.com/PostView.nhn?blogId={blogid}&logNo={log_No}&categoryNo=0&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=menu"
-
                 try:
                     print("Now Crawling : " + url)
                     for i in range(0, len(redirected_url)):
@@ -253,18 +259,29 @@ class Spider:
 
         # 이미지 파일같은 쓸모없는 링크를 전부 제외한 set()을 만든다.
         normal = set()
-        for i in range(len(raw_links)):
-            # 긁어온 URL이 image/ pdf/ javascript 인지 확인
-            isItImage = raw_links[i].get_attribute("href")
-            if (isItImage.find(".jpg") != -1 or isItImage.find(".png") != -1
-                or isItImage.find(".PNG") != -1 or isItImage.find("pdf") != -1
-                    or isItImage.find("javascript:void(0)") != -1 or isItImage.find("#") != -1
-                        or isItImage.find("feeds") != -1):
-                continue
-            # 긁어온 URL이 같은 도메인이 아닐 경우/ 이미 queue에 존재하는 경우 continue
-            if (Spider.add_links_in_sync_web(isItImage) != True):
-                continue
-            normal.add(isItImage)
+        j = 0
+        while (j < len(raw_links)) :
+            for raw in raw_links:
+                # 긁어온 URL이 image/ pdf/ javascript 인지 확인
+                try:
+                    isItImage = raw.get_attribute("href")
+                    if (isItImage.find(".jpg") != -1 or isItImage.find(".png") != -1
+                            or isItImage.find(".PNG") != -1 or isItImage.find("pdf") != -1
+                            or isItImage.find("javascript:void(0)") != -1 or isItImage.find("#") != -1
+                            or isItImage.find("feeds") != -1 or isItImage.find("search") != -1):
+                        j += 1
+                        continue
+
+                        # 긁어온 URL이 같은 도메인이 아닐 경우/ 이미 queue에 존재하는 경우 continue
+                    if (Spider.add_links_in_sync_web(isItImage) != True):
+                        j += 1
+                        continue
+
+                    j += 1
+                    normal.add(isItImage)
+
+                except StaleElementReferenceException as e:
+                    j += 1
 
         i =0
 
@@ -280,7 +297,11 @@ class Spider:
                         driver.execute_script(openurl)
                         driver.switch_to.window(driver.window_handles[-1])
                         data = Spider.parse_sync_blogspot(urlparse(Spider.base_url).netloc, link, driver)
+                        if (data == False): continue
+
                         buffered_document_send(data)
+                        driver.close()
+                        driver.switch_to.window(driver.window_handles[0])
 
                     # 글 하나가 존재하는 링크가 아니지만, 같은 블로그 내의 url일 경우 queue에 추가해서 다시 확인한다.
                     else:
@@ -318,6 +339,7 @@ class Spider:
                 if lastCount == lenOfPage: match = True
 
             raw_links = driver.find_elements_by_xpath("//a[@href]")
+
             for link in raw_links:
                 href = link.get_attribute("href")
                 if (href.find('/p/') != -1):
@@ -339,10 +361,15 @@ class Spider:
 
     @staticmethod
     def parse_sync_blogspot(base_url, page_url, driver):
-        d = {}
-        d['blog'] = base_url
-        d['url'] = page_url
-        d['title'] = driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/h3')[0].text
-        d['content'] = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]')[0].text
+        try:
+            d = {}
+            d['blog'] = base_url
+            d['url'] = page_url
+            d['title'] = driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/h3')[0].text
+            d['content'] = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]')[0].text
 
-        return d
+            return d
+
+        except IndexError as e:
+            print("Index out of range error 발생\n")
+            return False

@@ -1,4 +1,3 @@
-from urllib.request import Request, urlopen
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from urllib import parse
@@ -34,7 +33,7 @@ class Spider:
             # selenium web browser 관련설정
             path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
             options = webdriver.ChromeOptions()
-            options.add_argument('--headless')
+            #options.add_argument('--headless')
             options.add_argument('--window-size=1920x1080')
             options.add_argument('--disable-gpu')
 
@@ -67,6 +66,7 @@ class Spider:
             Spider.gather_links_in_medium(Spider.base_url, Spider.driver)
 
             Spider.driver.close()
+            Spider.driver.switch_to.window(Spider.driver.window_handles[0])
             Spider.queue.remove(page_url)
             Spider.crawled.add(page_url)
             Spider.update_files()
@@ -80,6 +80,7 @@ class Spider:
                 Spider.driver.close()
                 Spider.driver.switch_to.window(Spider.driver.window_handles[0])
 
+            Spider.crawled.add(page_url)
             Spider.queue.remove(page_url)
             Spider.update_files()
 
@@ -125,7 +126,7 @@ class Spider:
                 req = requests.get(page_url)
                 req.raise_for_status()
             except requests.HTTPError as e:
-                print(e)
+                print("Error : 페이지가 존재하지 않습니다. " + e)
                 return
 
             soup = BeautifulSoup(req.text, 'html.parser')
@@ -134,10 +135,11 @@ class Spider:
                 url = parse.urljoin(base_url, link.get('href'))
                 Spider.add_links_to_queue(url)
 
-            parse_content(base_url, page_url, soup)
+            #parse_content(base_url, page_url, soup)
 
         except Exception as e:
             print("[ERROR:gather_links] : ", str(e))
+
             return
 
     # Saves queue data to project files
@@ -171,12 +173,12 @@ class Spider:
                     r = requests.get(url)
                     r.raise_for_status()
                 except requests.HTTPError as e:
-                    print(e)
+                    print("Error : 페이지가 존재하지 않습니다. " + e)
                     break
                 print("Now Crawling : " + url)
                 Spider.crawled.add(url)
                 size_of_block += 1
-                parse_content(urlparse(Spider.base_url).netloc, url, r.text)
+                #parse_content(urlparse(Spider.base_url).netloc, url, r.text)
 
                 if (size_of_block >= 10):
                     Spider.update_files()
@@ -213,8 +215,8 @@ class Spider:
                         # crawled.txt에 url 추가 후 size_of_block +1
                         size_of_block += 1
                         req = requests.get(redirection_url_format.format(blogid=userid, log_No=logNo))
-                        parse_content(urlparse(Spider.base_url).netloc,
-                                      redirection_url_format.format(blogid=userid, log_No=logNo), req.text)
+                        #parse_content(urlparse(Spider.base_url).netloc,
+                                      #redirection_url_format.format(blogid=userid, log_No=logNo), req.text)
                     # if crawler gathers 50 links in the queue, update crawled.txt file.
                     if (size_of_block >= 10):
                         Spider.update_files()
@@ -222,7 +224,7 @@ class Spider:
 
                     page += 1
                 except Exception as e:
-                    print("error발생 : " + e)
+                    print("네이버 블로그 크롤링 error발생 : " + e)
                     break
 
         # 추가되지않고 남아있는 url을 모두 update해준다.
@@ -291,6 +293,7 @@ class Spider:
                     # 글 하나만 존재하는 링크일 경우 parse_content 이후 서버에 보내준다.
                     if (link.count("/") > 4 and
                             (link.find("html") != -1 or link[-1] != "/")):
+                        print("Crawl sync link : " + link)
                         Spider.crawled.add(link)
                         openurl = "window.open('{url}');"
                         openurl = openurl.format(url=link)
@@ -299,11 +302,11 @@ class Spider:
                         data = Spider.parse_sync_blogspot(urlparse(Spider.base_url).netloc, link, driver)
                         if (data == False): continue
 
-                        buffered_document_send(data)
+                        #buffered_document_send(data)
                         driver.close()
                         driver.switch_to.window(driver.window_handles[0])
 
-                    # 글 하나가 존재하는 링크가 아니지만, 같은 블로그 내의 url일 경우 queue에 추가해서 다시 확인한다.
+                    # 글 하나만 있는 링크가 아닐 경우 다시 접속해서 다른 링크가 있는지 확인한다.(queue에 추가)
                     else:
                         Spider.queue.add(link)
 
@@ -349,7 +352,7 @@ class Spider:
                     html = requests.get(href)
                     html = html.text
 
-                    parse_content(Spider.base_url, href, html)
+                    #parse_content(Spider.base_url, href, html)
 
         except Exception as e:
             print(str(e))
@@ -365,8 +368,18 @@ class Spider:
             d = {}
             d['blog'] = base_url
             d['url'] = page_url
-            d['title'] = driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/h3')[0].text
-            d['content'] = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]')[0].text
+
+            title = driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/h3')\
+                    + driver.find_elements_by_xpath('//*[@id="Blog1"]/div/article/div/div/h3')
+            content = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]') \
+                      + driver.find_elements_by_xpath('//*[@class="post-body entry-content float-container"]')
+            date = driver.find_elements_by_xpath('//*[@id="Blog1"]/div/article/div/div/div[2]/div/span/a/time') \
+            + driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/div[3]/div[1]/span[2]/a/abbr')
+
+            date = date[0].get_attribute("title")[0:10]
+            d['title'] = title[0].text
+            d['content'] = content[0].text
+            d['date'] = date[0].text
 
             return d
 

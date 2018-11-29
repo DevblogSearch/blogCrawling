@@ -1,4 +1,10 @@
 from bs4 import BeautifulSoup
+import requests
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BUFFER_SIZE = 10
+DOC_UPDATE_URL = "http://127.0.0.1:3000/document"
 
 def naver_parse(soup):
     naver_content = ''
@@ -13,6 +19,7 @@ def naver_parse(soup):
     else:
         naver_content = soup.find('div', {'id': 'postViewArea'}).text
 
+    print(naver_content)
     return naver_content
 
 def tistory_parse(soup):
@@ -43,7 +50,7 @@ def wordpress_parse(soup):
         else:
             wordpress_content = soup.find('div', {'id':'single'}).text
     else:
-        wordpress_content = soup.find('div', {'class':'entry-content'})
+        wordpress_content = soup.find('div', {'class':'entry-content'}).text
     return wordpress_content
 
 def medium_parse(soup):
@@ -59,24 +66,60 @@ def brunch_parse(soup):
         brunch_content += content.text
     return brunch_content
 
+def naver_date(soup):
+    date = ''
+    if soup.find('span', {'class': 'se_publishDate'}) == None:
+        date = soup.find('p', {'class': 'date'}).text
+    else:
+        date = soup.find('span', {'class': 'se_publishDate'}).text
+    return date
+
+def blogspot_date(soup):
+    date = ''
+    if soup.find('abbr', {'class': 'published'}) == None:
+        date = soup.find('abbr', {'class': 'published'})
+    else:
+        date = soup.find('time', {'class': 'published'})
+    return date['title']
+
+def tiwobrme_date(soup):
+    date = ''
+    if soup.find("meta", property = "article:published_time") == None:
+        date = soup.find("meta", property = "article:modified_time")
+    else:
+        date = soup.find("meta", property = "article:published_time")
+    return date['content']
+
 def parse_content(base_url, page_url, html):
+
     soup = BeautifulSoup(html, 'html.parser')
+    [s.extract() for s in soup('script')]
     d = {}
     d['blog'] = base_url
     d['url'] = page_url
     d['title'] = soup.title.text
-    if(base_url == 'blog.naver.com/'):
+    if(base_url == 'blog.naver.com'):
         d['content'] = naver_parse(soup)
-    elif(base_url == 'tistory.com/'):
+        d['date'] = naver_date(soup)
+    elif(base_url == 'tistory.com'):
         d['content'] = tistory_parse(soup)
-    elif(base_url == 'blogspot.com/'):
+        d['date'] = tiwobrme_date(soup)
+    elif(base_url == 'blogspot.com'):
         d['content'] = blogspot_parse(soup)
-    elif(base_url == 'wordpress.com/'):
+        d['date'] = blogspot_date(soup)
+    elif(base_url == 'wordpress.com'):
         d['content'] = wordpress_parse(soup)
-    elif(base_url == 'brunch.co.kr/'):
+        d['date'] = tiwobrme_date(soup)
+    elif(base_url == 'brunch.co.kr'):
         d['content'] = brunch_parse(soup)
-    elif(base_url == 'medium.com/'):
+        d['date'] = tiwobrme_date(soup)
+    elif(base_url == 'medium.com'):
         d['content'] = medium_parse(soup)
+        d['date'] = tiwobrme_date(soup)
     else:
         d['content'] = soup.body.text
-    return d
+    buffered_document_send(d)
+
+def buffered_document_send(data):
+    headers = {'Content-Type': 'application/json', 'Accept':'application/json', 'charset':'utf-8'}
+    res = requests.post(DOC_UPDATE_URL, headers=headers, json=[data])

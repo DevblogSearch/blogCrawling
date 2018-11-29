@@ -66,6 +66,30 @@ def brunch_parse(soup):
         brunch_content += content.text
     return brunch_content
 
+def naver_date(soup):
+    date = ''
+    if soup.find('span', {'class': 'se_publishDate'}) == None:
+        date = soup.find('p', {'class': 'date'}).text
+    else:
+        date = soup.find('span', {'class': 'se_publishDate'}).text
+    return date
+
+def blogspot_date(soup):
+    date = ''
+    if soup.find('abbr', {'class': 'published'}) == None:
+        date = soup.find('abbr', {'class': 'published'})
+    else:
+        date = soup.find('time', {'class': 'published'})
+    return date['title']
+
+def tiwobrme_date(soup):
+    date = ''
+    if soup.find("meta", property = "article:published_time") == None:
+        date = soup.find("meta", property = "article:modified_time")
+    else:
+        date = soup.find("meta", property = "article:published_time")
+    return date['content']
+
 def parse_content(base_url, page_url, html):
 
     soup = BeautifulSoup(html, 'html.parser')
@@ -76,19 +100,24 @@ def parse_content(base_url, page_url, html):
     d['title'] = soup.title.text
     if(base_url == 'blog.naver.com'):
         d['content'] = naver_parse(soup)
+        d['date'] = naver_date(soup)
     elif(base_url == 'tistory.com'):
         d['content'] = tistory_parse(soup)
+        d['date'] = tiwobrme_date(soup)
     elif(base_url == 'blogspot.com'):
         d['content'] = blogspot_parse(soup)
+        d['date'] = blogspot_date(soup)
     elif(base_url == 'wordpress.com'):
         d['content'] = wordpress_parse(soup)
+        d['date'] = tiwobrme_date(soup)
     elif(base_url == 'brunch.co.kr'):
         d['content'] = brunch_parse(soup)
+        d['date'] = tiwobrme_date(soup)
     elif(base_url == 'medium.com'):
         d['content'] = medium_parse(soup)
+        d['date'] = tiwobrme_date(soup)
     else:
         d['content'] = soup.body.text
-
     buffered_document_send(d)
 
 def buffered_document_send(data):

@@ -166,15 +166,20 @@ class Spider:
         # 브런치 블로그 크롤링 , num = 1
         # 요청을 보낸 뒤, 페이지가 없을 경우 iteration을 종료한다.
         if num == 1:
+            unconnected = 0
             for page in itertools.count(start=1):
-                url = Blog_platform.format(blog_id=userid, page=page)
+                if (unconnected >= 8):
+                    break
 
+                url = Blog_platform.format(blog_id=userid, page=page)
                 try:
                     r = requests.get(url)
                     r.raise_for_status()
                 except requests.HTTPError as e:
-                    print("Error : 페이지가 존재하지 않습니다. " + e)
-                    break
+                    print(e)
+                    unconnected += 1
+                    continue
+
                 print("Now Crawling : " + url)
                 Spider.crawled.add(url)
                 size_of_block += 1
@@ -373,14 +378,16 @@ class Spider:
                     + driver.find_elements_by_xpath('//*[@id="Blog1"]/div/article/div/div/h3')
             content = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]') \
                       + driver.find_elements_by_xpath('//*[@class="post-body entry-content float-container"]')
+            '''
             date = driver.find_elements_by_xpath('//*[@id="Blog1"]/div/article/div/div/div[2]/div/span/a/time') \
             + driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/div[3]/div[1]/span[2]/a/abbr')
-
+            
             date = date[0].get_attribute("title")[0:10]
-            d['title'] = title[0].text
-            d['content'] = content[0].text
             d['date'] = date[0].text
 
+                '''
+            d['title'] = title[0].text
+            d['content'] = content[0].text
             return d
 
         except IndexError as e:

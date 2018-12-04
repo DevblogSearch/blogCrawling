@@ -33,7 +33,7 @@ class Spider:
             # selenium web browser 관련설정
             path = "C:\\Users\\rhyme\\Downloads\\chromedriver_win32\\chromedriver.exe"
             options = webdriver.ChromeOptions()
-            #options.add_argument('--headless')
+            options.add_argument('--headless')
             options.add_argument('--window-size=1920x1080')
             options.add_argument('--disable-gpu')
 
@@ -63,6 +63,7 @@ class Spider:
 
         # medium 블로그 크롤링 시 이용
         if Pdomain_name[-2] == "medium":
+            print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
             Spider.gather_links_in_medium(Spider.base_url, Spider.driver)
 
             Spider.driver.close()
@@ -73,8 +74,9 @@ class Spider:
 
         # db.yml 파일 사용 시 주석처리 해줘야 함.
         elif Pdomain_name[-2] == "blogspot":
+            print("Queue : " + len(Spider.queue) + " | Crawled : " + len(Spider.crawled))
             Spider.gather_links_in_sync_web(page_url, Spider.driver)
-            
+
             # 켜져있는 tab을 1개 빼고 모두 제거
             for i in range(len(Spider.driver.window_handles)-1):
                 Spider.driver.close()
@@ -126,7 +128,7 @@ class Spider:
                 req = requests.get(page_url)
                 req.raise_for_status()
             except requests.HTTPError as e:
-                print("Error : 페이지가 존재하지 않습니다. " + e)
+                print("Error : 페이지가 존재하지 않습니다. ")
                 return
 
             soup = BeautifulSoup(req.text, 'html.parser')
@@ -135,7 +137,7 @@ class Spider:
                 url = parse.urljoin(base_url, link.get('href'))
                 Spider.add_links_to_queue(url)
 
-            #parse_content(base_url, page_url, soup)
+            parse_content(base_url, page_url, soup)
 
         except Exception as e:
             print("[ERROR:gather_links] : ", str(e))
@@ -180,10 +182,10 @@ class Spider:
                     unconnected += 1
                     continue
 
-                print("Now Crawling : " + url)
                 Spider.crawled.add(url)
+                print("Now Crawling : " + url + " | Crawled : " + len(Spider.crawled))
                 size_of_block += 1
-                #parse_content(urlparse(Spider.base_url).netloc, url, r.text)
+                parse_content(urlparse(Spider.base_url).netloc, url, r.text)
 
                 if (size_of_block >= 10):
                     Spider.update_files()
@@ -206,7 +208,7 @@ class Spider:
                 redirection_url_format = "https://blog.naver.com/PostView.nhn?blogId={blogid}&logNo={log_No}&categoryNo=0&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=menu"
 
                 try:
-                    print("Now Crawling : " + url)
+                    print("Now Crawling : " + url + " | Crawled : " + len(Spider.crawled))
                     for i in range(0, len(redirected_url)):
                         if (redirected_url[i].get('class') == 'fil5 pcol2'
                                 or redirected_url[i].get('class')[0] == 'fil5'):
@@ -226,8 +228,8 @@ class Spider:
                         # crawled.txt에 url 추가 후 size_of_block +1
                         size_of_block += 1
                         req = requests.get(redirection_url_format.format(blogid=userid, log_No=logNo))
-                        #parse_content(urlparse(Spider.base_url).netloc,
-                                      #redirection_url_format.format(blogid=userid, log_No=logNo), req.text)
+                        parse_content(urlparse(Spider.base_url).netloc,
+                                      redirection_url_format.format(blogid=userid, log_No=logNo), req.text)
                     # if crawler gathers 50 links in the queue, update crawled.txt file.
                     if (size_of_block >= 10):
                         Spider.update_files()
@@ -313,7 +315,7 @@ class Spider:
                         data = Spider.parse_sync_blogspot(urlparse(Spider.base_url).netloc, link, driver)
                         if (data == False): continue
 
-                        #buffered_document_send(data)
+                        buffered_document_send(data)
                         driver.close()
                         driver.switch_to.window(driver.window_handles[0])
 
@@ -363,7 +365,7 @@ class Spider:
                     html = requests.get(href)
                     html = html.text
 
-                    #parse_content(Spider.base_url, href, html)
+                    parse_content(Spider.base_url, href, html)
 
         except Exception as e:
             print(str(e))
@@ -384,14 +386,12 @@ class Spider:
                     + driver.find_elements_by_xpath('//*[@id="Blog1"]/div/article/div/div/h3')
             content = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]') \
                       + driver.find_elements_by_xpath('//*[@class="post-body entry-content float-container"]')
-            '''
             date = driver.find_elements_by_xpath('//*[@id="Blog1"]/div/article/div/div/div[2]/div/span/a/time') \
             + driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/div[3]/div[1]/span[2]/a/abbr')
             
             date = date[0].get_attribute("title")[0:10]
             d['date'] = date[0].text
 
-                '''
             d['title'] = title[0].text
             d['content'] = content[0].text
             return d

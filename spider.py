@@ -204,6 +204,7 @@ class Spider:
                     'class': "url pcol2 _setClipboard _returnFalse _se3copybtn _transPosition"})
 
                 redirection_url_format = "https://blog.naver.com/PostView.nhn?blogId={blogid}&logNo={log_No}&categoryNo=0&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=menu"
+
                 try:
                     print("Now Crawling : " + url)
                     for i in range(0, len(redirected_url)):
@@ -211,7 +212,12 @@ class Spider:
                                 or redirected_url[i].get('class')[0] == 'fil5'):
 
                             real_url = redirected_url[i].get('href')
-                            logNo = urlparse(real_url).path.replace("/", "")[len(userid):]
+                            if (real_url.count("/") >= 2):
+                                logNo = urlparse(real_url).path.replace("/", "")[len(userid):]
+                            # href 태그가 id.blog.me 형식일 경우 path 값에는 log 만 존재한다.
+                            else:
+                                logNo = urlparse(real_url).path.replace("/", "")
+
                             Spider.crawled.add(redirection_url_format.format(blogid=userid, log_No=logNo))
                         else:
                             real_url = redirected_url[i].get('title')

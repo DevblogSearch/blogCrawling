@@ -9,7 +9,7 @@ DOC_UPDATE_URL = "http://127.0.0.1:3000/document"
 def naver_parse(soup):
     naver_content = ''
     if soup.find('div', {'id': 'postViewArea'}) == None:
-        data = soup.findAll('div', {'class': 'se_textView'})
+        data = soup.findAll('div', {'class': 'se_textView'}).text
         TF = 1
         for content in data:
             if (TF):
@@ -18,8 +18,6 @@ def naver_parse(soup):
                 naver_content += content.text
     else:
         naver_content = soup.find('div', {'id': 'postViewArea'}).text
-
-    print(naver_content)
     return naver_content
 
 def tistory_parse(soup):
@@ -72,6 +70,16 @@ def naver_date(soup):
         date = soup.find('p', {'class': 'date'}).text
     else:
         date = soup.find('span', {'class': 'se_publishDate'}).text
+    year = date[:4]
+    month = date[6:8]
+    day = date[9:12]
+    if month[1] == '.':
+        month = '0' + month[0]
+    if day[0] == ' ':
+        day = day[1:3]
+    elif day[2] == '.':
+        day = day[:2]
+    date = year + '-' + month + '-' + day
     return date
 
 def blogspot_date(soup):
@@ -80,14 +88,19 @@ def blogspot_date(soup):
         date = soup.find('abbr', {'class': 'published'})
     else:
         date = soup.find('time', {'class': 'published'})
+    date['title'] = date['title'][:10]
     return date['title']
 
-def tiwobrme_date(soup):
+def except_date(soup):
     date = ''
     if soup.find("meta", property = "article:published_time") == None:
-        date = soup.find("meta", property = "article:modified_time")
+        if soup.find("meta", property="article:modified_time") == None:
+            return date
+        else:
+            date = soup.find("meta", property = "article:modified_time")
     else:
         date = soup.find("meta", property = "article:published_time")
+    date['content'] = date['content'][:10]
     return date['content']
 
 def parse_content(base_url, page_url, html):
@@ -101,24 +114,27 @@ def parse_content(base_url, page_url, html):
     if(base_url == 'blog.naver.com'):
         d['content'] = naver_parse(soup)
         d['date'] = naver_date(soup)
-    elif(base_url == 'tistory.com'):
+    elif(base_url.find('tistory.com')):
         d['content'] = tistory_parse(soup)
-        d['date'] = tiwobrme_date(soup)
-    elif(base_url == 'blogspot.com'):
+        d['date'] = except_date(soup)
+    elif(base_url.find('blogspot.com')):
         d['content'] = blogspot_parse(soup)
         d['date'] = blogspot_date(soup)
-    elif(base_url == 'wordpress.com'):
+    elif(base_url.find('wordpress.com')):
         d['content'] = wordpress_parse(soup)
-        d['date'] = tiwobrme_date(soup)
-    elif(base_url == 'brunch.co.kr'):
+        d['date'] = except_date(soup)
+    elif(base_url.find('brunch.co.kr')):
         d['content'] = brunch_parse(soup)
-        d['date'] = tiwobrme_date(soup)
-    elif(base_url == 'medium.com'):
+        d['date'] = except_date(soup)
+    elif(base_url.find('medium.com')):
         d['content'] = medium_parse(soup)
-        d['date'] = tiwobrme_date(soup)
+        d['date'] = except_date(soup)
     else:
         d['content'] = soup.body.text
-    buffered_document_send(d)
+        d['date'] = except_date(soup)
+
+    if (d!= None):
+        buffered_document_send(d)
 
 def buffered_document_send(data):
     headers = {'Content-Type': 'application/json', 'Accept':'application/json', 'charset':'utf-8'}

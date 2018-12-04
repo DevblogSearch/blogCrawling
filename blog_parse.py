@@ -114,19 +114,19 @@ def parse_content(base_url, page_url, html):
     if(base_url == 'blog.naver.com'):
         d['content'] = naver_parse(soup)
         d['date'] = naver_date(soup)
-    elif(base_url.find('tistory.com')):
+    elif(base_url.find('tistory.com') != -1):
         d['content'] = tistory_parse(soup)
         d['date'] = except_date(soup)
-    elif(base_url.find('blogspot.com')):
+    elif(base_url.find('blogspot.com') != -1):
         d['content'] = blogspot_parse(soup)
         d['date'] = blogspot_date(soup)
-    elif(base_url.find('wordpress.com')):
+    elif(base_url.find('wordpress.com') != -1):
         d['content'] = wordpress_parse(soup)
         d['date'] = except_date(soup)
-    elif(base_url.find('brunch.co.kr')):
+    elif(base_url.find('brunch.co.kr') != -1):
         d['content'] = brunch_parse(soup)
         d['date'] = except_date(soup)
-    elif(base_url.find('medium.com')):
+    elif(base_url.find('medium.com') != -1):
         d['content'] = medium_parse(soup)
         d['date'] = except_date(soup)
     else:

@@ -74,7 +74,7 @@ class Spider:
 
         # db.yml 파일 사용 시 주석처리 해줘야 함.
         elif Pdomain_name[-2] == "blogspot":
-            print("Queue : " + len(Spider.queue) + " | Crawled : " + len(Spider.crawled))
+            print('Queue ' + str(len(Spider.queue)) + ' | Crawled ' + str(len(Spider.crawled)))
             Spider.gather_links_in_sync_web(page_url, Spider.driver)
 
             # 켜져있는 tab을 1개 빼고 모두 제거
@@ -183,7 +183,7 @@ class Spider:
                     continue
 
                 Spider.crawled.add(url)
-                print("Now Crawling : " + url + " | Crawled : " + len(Spider.crawled))
+                print("Now Crawling : " + url + " | Crawled : " + str(len(Spider.crawled)))
                 size_of_block += 1
                 parse_content(urlparse(Spider.base_url).netloc, url, r.text)
 
@@ -208,7 +208,7 @@ class Spider:
                 redirection_url_format = "https://blog.naver.com/PostView.nhn?blogId={blogid}&logNo={log_No}&categoryNo=0&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=menu"
 
                 try:
-                    print("Now Crawling : " + url + " | Crawled : " + len(Spider.crawled))
+                    print("Now Crawling : " + url + " | Crawled : " + str(len(Spider.crawled)))
                     for i in range(0, len(redirected_url)):
                         if (redirected_url[i].get('class') == 'fil5 pcol2'
                                 or redirected_url[i].get('class')[0] == 'fil5'):
@@ -386,6 +386,7 @@ class Spider:
                     + driver.find_elements_by_xpath('//*[@id="Blog1"]/div/article/div/div/h3')
             content = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]') \
                       + driver.find_elements_by_xpath('//*[@class="post-body entry-content float-container"]')
+        
             date = driver.find_elements_by_xpath('//*[@id="Blog1"]/div/article/div/div/div[2]/div/span/a/time') \
             + driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/div[3]/div[1]/span[2]/a/abbr')
             

@@ -9,7 +9,7 @@ DOC_UPDATE_URL = "http://127.0.0.1:3000/document"
 def naver_parse(soup):
     naver_content = ''
     if soup.find('div', {'id': 'postViewArea'}) == None:
-        data = soup.findAll('div', {'class': 'se_textView'}).text
+        data = soup.findAll('div', {'class': 'se_textView'})
         TF = 1
         for content in data:
             if (TF):

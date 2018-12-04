@@ -72,7 +72,7 @@ class Spider:
             Spider.crawled.add(page_url)
             Spider.update_files()
 
-        # db.yml 파일 사용 시 주석처리 해줘야 함.
+        # db.yml 파일 사용 시 주석처리 해줘야 함. (동적 블로그 크롤링)
         elif Pdomain_name[-2] == "blogspot":
             print('Queue ' + str(len(Spider.queue)) + ' | Crawled ' + str(len(Spider.crawled)))
             Spider.gather_links_in_sync_web(page_url, Spider.driver)
@@ -125,7 +125,8 @@ class Spider:
             if page_url in Spider.crawled:
                 return
             try:
-                req = requests.get(page_url)
+                req = requests.get(page_url,
+                                   headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'})
                 req.raise_for_status()
             except requests.HTTPError as e:
                 print("Error : 페이지가 존재하지 않습니다. ")
@@ -137,7 +138,7 @@ class Spider:
                 url = parse.urljoin(base_url, link.get('href'))
                 Spider.add_links_to_queue(url)
 
-            parse_content(base_url, page_url, soup)
+            parse_content(base_url, page_url, req.text)
 
         except Exception as e:
             print("[ERROR:gather_links] : ", str(e))
@@ -263,14 +264,17 @@ class Spider:
             return
 
     @staticmethod
-    def gather_links_in_sync_web(page_url, driver):
+    def gather_links_in_sync_web(page_url, driver, num):
         openurl = "window.open('{url}');"
         openurl = openurl.format(url=page_url)
 
         driver.execute_script(openurl)
         driver.switch_to.window(driver.window_handles[-1])
         time.sleep(1)
-        raw_links = driver.find_elements_by_xpath("//a[@href]")
+
+        # 동적 blogspot
+        if (num == 1):
+            raw_links = driver.find_elements_by_xpath("//a[@href]")
 
         # 이미지 파일같은 쓸모없는 링크를 전부 제외한 set()을 만든다.
         normal = set()
@@ -386,13 +390,12 @@ class Spider:
                     + driver.find_elements_by_xpath('//*[@id="Blog1"]/div/article/div/div/h3')
             content = driver.find_elements_by_xpath('//*[@class="post-body entry-content"]') \
                       + driver.find_elements_by_xpath('//*[@class="post-body entry-content float-container"]')
-        
+
             date = driver.find_elements_by_xpath('//*[@id="Blog1"]/div/article/div/div/div[2]/div/span/a/time') \
             + driver.find_elements_by_xpath('//*[@id="Blog1"]/div[1]/div/div/div/div[1]/div[3]/div[1]/span[2]/a/abbr')
-            
             date = date[0].get_attribute("title")[0:10]
-            d['date'] = date[0].text
 
+            d['date'] = date[0].text
             d['title'] = title[0].text
             d['content'] = content[0].text
             return d

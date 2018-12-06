@@ -215,12 +215,11 @@ class Spider:
                                 or redirected_url[i].get('class')[0] == 'fil5'):
 
                             real_url = redirected_url[i].get('href')
-                            if (real_url.count("/") >= 2):
+                            if (real_url.count("/") >= 4):
                                 logNo = urlparse(real_url).path.replace("/", "")[len(userid):]
                             # href 태그가 id.blog.me 형식일 경우 path 값에는 log 만 존재한다.
                             else:
                                 logNo = urlparse(real_url).path.replace("/", "")
-
                             Spider.crawled.add(redirection_url_format.format(blogid=userid, log_No=logNo))
                         else:
                             real_url = redirected_url[i].get('title')

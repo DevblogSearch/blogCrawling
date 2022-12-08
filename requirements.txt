@@ -1,6 +1,6 @@
 articleDateExtractor==0.20
 beautifulsoup4==4.6.3
-certifi==2018.8.24
+certifi==2022.12.7
 chardet==3.0.4
 idna==2.7
 python-dateutil==2.7.3
